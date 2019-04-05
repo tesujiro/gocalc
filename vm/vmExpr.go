@@ -16,7 +16,9 @@ func Run(expr ast.Expr, env *Env) error {
 	if err != nil {
 		return err
 	}
+	// LLIR: %y = load i32, i32* %x
 	r := env.entry.NewLoad(result)
+	// LLIR: ret i32 %y
 	env.entry.NewRet(r)
 	return nil
 }
@@ -36,6 +38,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		i1 := constant.NewInt(types.I32, i64)
 		env.entry.NewStore(i1, tmp)
 		return value.Value(tmp), nil
+
 	case *ast.BinOpExpr:
 		var left, right value.Value
 		var err error
