@@ -2,6 +2,14 @@ package ast
 
 type Expr interface{}
 
+type IdentExpr struct {
+	Literal string
+}
+
+type AssExpr struct {
+	Left  string
+	Right Expr
+}
 type NumExpr struct {
 	Literal string
 }
@@ -27,11 +35,6 @@ type BinOpExpr struct {
 	Left     Expr
 	Operator string
 	Right    Expr
-}
-
-type AssExpr struct {
-	Left  []Expr
-	Right []Expr
 }
 
 type CompExpr struct {

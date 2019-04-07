@@ -5,35 +5,11 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 	"github.com/tesujiro/gocalc/ast"
 )
-
-func Run(expr ast.Expr, env *Env) error {
-	result, err := evalExpr(expr, env)
-	if err != nil {
-		return err
-	}
-	// LLIR: %y = load i32, i32* %x
-	r := env.entry.NewLoad(result)
-
-	// LLIR: declare i32 @printf(i8* %format, ...)
-	i8ptr := types.NewPointer(types.I8)
-	zero := constant.NewInt(types.I32, 0)
-	printf := env.module.NewFunc("printf", types.I32, ir.NewParam("format", i8ptr))
-	printf.Sig.Variadic = true
-	// LLIR: @.str.result = global [12 x i8] c"Result : %d\0A"
-	str := env.module.NewGlobalDef(".str.result", constant.NewCharArrayFromString("Result : %d\n"))
-	// LLIR: %8 = call i32 (i8*, ...) @printf(i8* getelementptr ([12 x i8], [12 x i8]* @.str.result, i32 0, i32 0), i32 %7)
-	env.entry.NewCall(printf, constant.NewGetElementPtr(str, zero, zero), r)
-
-	// LLIR: ret i32 %y
-	env.entry.NewRet(r)
-	return nil
-}
 
 func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 	//fmt.Printf("evalExpr(%#v)\n", expr)
@@ -50,6 +26,27 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		i1 := constant.NewInt(types.I32, i64)
 		env.entry.NewStore(i1, tmp)
 		return value.Value(tmp), nil
+
+	case *ast.IdentExpr:
+		id := expr.(*ast.IdentExpr).Literal
+		v, err := env.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+
+	case *ast.AssExpr:
+		assExpr := expr.(*ast.AssExpr)
+		key, exp := assExpr.Left, assExpr.Right
+		var val value.Value
+		var err error
+		if val, err = evalExpr(exp, env); err != nil {
+			return nil, err
+		}
+		if err = env.Set(key, val); err != nil {
+			return nil, err
+		}
+		return val, nil
 
 	case *ast.BinOpExpr:
 		var left, right value.Value

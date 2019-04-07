@@ -11,6 +11,7 @@ import (
 func main() {
 
 	//parser.TraceLexer()
+
 	if len(os.Args) < 2 {
 		fmt.Println("No expression error!")
 		fmt.Printf("ex: %v '(1+1)*3+10' | lli ; echo $?\n", os.Args[0])

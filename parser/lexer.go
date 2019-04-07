@@ -76,6 +76,16 @@ retry:
 	pos = s.pos()
 	s.peek()
 	switch ch := s.peek(); {
+	case isLetter(ch):
+		lit, err = s.scanIdentifier()
+		if err != nil {
+			return
+		}
+		if name, ok := opName[lit]; ok {
+			tok = name
+		} else {
+			tok = IDENT
+		}
 	case isDigit(ch):
 		tok = NUMBER
 		lit, err = s.scanNumber()
@@ -138,19 +148,19 @@ retry:
 				tok = int(ch)
 				lit = string(ch)
 			}
+		case '=':
+			s.next()
+			switch s.peek() {
 			/*
 				case '=':
-					s.next()
-					switch s.peek() {
-					case '=':
-						tok = EQEQ
-						lit = "=="
-					default:
-						s.back()
-						tok = int(ch)
-						lit = string(ch)
-					}
+					tok = EQEQ
+					lit = "=="
 			*/
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
 		case '+':
 			s.next()
 			switch s.peek() {
@@ -527,7 +537,7 @@ type Lexer struct {
 	lit    string
 	pos    ast.Position
 	e      error
-	result ast.Expr
+	result []ast.Stmt
 }
 
 // Lex scans the token and literals.
@@ -552,7 +562,7 @@ func (l *Lexer) Error(msg string) {
 }
 
 // Parse provides way to parse the code using Scanner.
-func Parse(s *Scanner) (ast.Expr, error) {
+func Parse(s *Scanner) ([]ast.Stmt, error) {
 	l := Lexer{s: s}
 	if yyParse(&l) != 0 {
 		return nil, l.e
@@ -580,7 +590,7 @@ func initialize() {
 }
 
 // ParseSrc provides way to parse the code from source.
-func ParseSrc(src string) (ast.Expr, error) {
+func ParseSrc(src string) ([]ast.Stmt, error) {
 	initialize()
 	scanner := &Scanner{
 		src: []rune(src),
