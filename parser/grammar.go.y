@@ -19,6 +19,8 @@
 %type	<expr>		expr
 
 %token	<token>		NUMBER STRING IDENT
+%token <token> PRINT PRINTF
+%token <token> IF ELSE
 /*
 %token	<token>	IDENT NUMBER STRING TRUE FALSE NIL
 %token	<token>	EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
@@ -63,6 +65,10 @@ stmt
 	: expr
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
+	}
+	| PRINT expr
+	{
+		$$ = &ast.PrintStmt{Expr: $2}
 	}
 
 expr
