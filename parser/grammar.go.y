@@ -19,8 +19,10 @@
 %type	<expr>		expr
 
 %token	<token>		NUMBER STRING IDENT
-%token <token> PRINT PRINTF
-%token <token> IF ELSE
+%token	<token>		PRINT PRINTF
+%token	<token>		TRUE FALSE
+%token	<token>		EQEQ NEQ GE LE ANDAND OROR
+%token	<token>		IF ELSE
 /*
 %token	<token>	IDENT NUMBER STRING TRUE FALSE NIL
 %token	<token>	EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
@@ -28,7 +30,12 @@
 */
 
 %right '='
+%left OROR
+%left ANDAND
 %left IDENT
+%left EQEQ NEQ
+%left '>' '<' GE LE
+
 %left NUMBER STRING
 %left '+' '-'
 %left '*' '/' '%'
@@ -84,6 +91,15 @@ expr
 	{
 		$$ = &ast.NumExpr{Literal: $1.Literal}
 	}
+	/* BOOL EXPRESSION */
+	| expr OROR expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "||", Right: $3}
+	}
+	| expr ANDAND expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
+	}
 	| '(' expr ')'
 	{
 		$$ = &ast.ParentExpr{SubExpr: $2}
@@ -107,6 +123,31 @@ expr
 	| expr '%' expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+	}
+	/* RELATION EXPRESSION */
+	| expr EQEQ expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
+	}
+	| expr NEQ expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
+	}
+	| expr '>' expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
+	}
+	| expr GE expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
+	}
+	| expr '<' expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
+	}
+	| expr LE expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
 	}
 
 opt_term

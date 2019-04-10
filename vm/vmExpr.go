@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 	"github.com/tesujiro/gocalc/ast"
@@ -73,6 +74,18 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		case "*":
 			// LLIR: %r= mul i32 %l, %r
 			result = env.entry.NewMul(l_register, r_register)
+		case "<":
+			result = env.entry.NewICmp(enum.IPredSLT, l_register, r_register)
+		case ">":
+			result = env.entry.NewICmp(enum.IPredSGT, l_register, r_register)
+		case "<=":
+			result = env.entry.NewICmp(enum.IPredSLE, l_register, r_register)
+		case ">=":
+			result = env.entry.NewICmp(enum.IPredSGE, l_register, r_register)
+		case "==":
+			result = env.entry.NewICmp(enum.IPredEQ, l_register, r_register)
+		case "!=":
+			result = env.entry.NewICmp(enum.IPredNE, l_register, r_register)
 		/*
 			case "/":
 					num.Quo(lnum, rnum)
@@ -82,7 +95,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		}
 
 		// LLIR: %x = alloca i32
-		tmp := env.entry.NewAlloca(types.I32)
+		tmp := env.entry.NewAlloca(result.Type())
 		// LLIR: store i32 <u>, i32* %x
 		env.entry.NewStore(result, tmp)
 

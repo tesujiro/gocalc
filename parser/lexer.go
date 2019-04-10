@@ -134,10 +134,10 @@ retry:
 		case '!':
 			s.next()
 			switch s.peek() {
+			case '=':
+				tok = NEQ
+				lit = "!="
 			/*
-				case '=':
-					tok = NEQ
-					lit = "!="
 				case '~':
 					tok = NOTTILDE
 					lit = "!~"
@@ -150,11 +150,9 @@ retry:
 		case '=':
 			s.next()
 			switch s.peek() {
-			/*
-				case '=':
-					tok = EQEQ
-					lit = "=="
-			*/
+			case '=':
+				tok = EQEQ
+				lit = "=="
 			default:
 				s.back()
 				tok = int(ch)
@@ -251,11 +249,9 @@ retry:
 		case '>':
 			s.next()
 			switch s.peek() {
-			/*
-				case '=':
-					tok = GE
-					lit = ">="
-			*/
+			case '=':
+				tok = GE
+				lit = ">="
 			default:
 				s.back()
 				tok = int(ch)
@@ -264,11 +260,9 @@ retry:
 		case '<':
 			s.next()
 			switch s.peek() {
-			/*
-				case '=':
-					tok = LE
-					lit = "<="
-			*/
+			case '=':
+				tok = LE
+				lit = "<="
 			default:
 				s.back()
 				tok = int(ch)

@@ -44,8 +44,14 @@ func run(stmts []ast.Stmt, env *Env) error {
 	zero := constant.NewInt(types.I32, 0)
 	env.entry.NewCall(env.lib["printf"], constant.NewGetElementPtr(env.defs[".result"], zero, zero), r)
 
-	// LLIR: ret i32 %y
-	env.entry.NewRet(r)
+	if r.Type() == types.I32 {
+		// LLIR: ret i32 %y
+		env.entry.NewRet(r)
+	} else {
+		r32 := env.entry.NewZExt(r, types.I32)
+		// LLIR: ret i32 %y
+		env.entry.NewRet(r32)
+	}
 	return nil
 }
 
@@ -62,7 +68,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		r := env.entry.NewLoad(v)
 
 		switch r.Type() {
-		case types.I32:
+		case types.I1, types.I32:
 			// LLIR: %8 = call i32 (i8*, ...) @printf(i8* getelementptr ([12 x i8], [12 x i8]* @.str.result, i32 0, i32 0), i32 %7)
 			zero := constant.NewInt(types.I32, 0)
 			env.entry.NewCall(env.lib["printf"], constant.NewGetElementPtr(env.defs[".print_int"], zero, zero), r)
