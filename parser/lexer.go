@@ -271,11 +271,9 @@ retry:
 		case '|':
 			s.next()
 			switch s.peek() {
-			/*
-				case '|':
-					tok = OROR
-					lit = "||"
-			*/
+			case '|':
+				tok = OROR
+				lit = "||"
 			default:
 				s.back()
 				tok = int(ch)
@@ -284,11 +282,9 @@ retry:
 		case '&':
 			s.next()
 			switch s.peek() {
-			/*
-				case '&':
-					tok = ANDAND
-					lit = "&&"
-			*/
+			case '&':
+				tok = ANDAND
+				lit = "&&"
 			default:
 				s.back()
 				tok = int(ch)

@@ -86,6 +86,10 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			result = env.entry.NewICmp(enum.IPredEQ, l_register, r_register)
 		case "!=":
 			result = env.entry.NewICmp(enum.IPredNE, l_register, r_register)
+		case "&&":
+			result = env.entry.NewAnd(l_register, r_register)
+		case "||":
+			result = env.entry.NewOr(l_register, r_register)
 		/*
 			case "/":
 					num.Quo(lnum, rnum)
