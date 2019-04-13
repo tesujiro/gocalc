@@ -15,7 +15,9 @@
 
 %type	<stmts>		program
 %type	<stmt>		stmt
+%type	<stmt>		stmt_if
 %type	<stmts>		stmts
+%type	<stmts>		opt_stmts
 %type	<expr>		expr
 
 %token	<token>		NUMBER STRING IDENT
@@ -68,6 +70,16 @@ stmts
 		$$ = append($1,$3)
 	}
 
+opt_stmts
+	: /* empty */
+	{
+		$$ = []ast.Stmt{}
+	}
+	| stmts opt_term
+	{
+		$$ = $1
+	}
+	
 stmt
 	: expr
 	{
@@ -76,6 +88,31 @@ stmt
 	| PRINT expr
 	{
 		$$ = &ast.PrintStmt{Expr: $2}
+	}
+	| stmt_if
+	{
+		$$ = $1
+	}
+
+stmt_if
+	: IF expr '{' opt_stmts '}'
+	{
+	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
+	}
+	/*
+	| stmt_if ELSE IF expr '{' opt_stmts '}'
+	{
+	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
+	}
+	*/
+	| stmt_if ELSE '{' opt_stmts '}'
+	{
+		if $$.(*ast.IfStmt).Else != nil {
+			yylex.Error("multiple else statement")
+		} else {
+			//$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
+			$$.(*ast.IfStmt).Else = $4
+		}
 	}
 
 expr

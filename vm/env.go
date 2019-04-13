@@ -16,7 +16,8 @@ type Env struct {
 	defs   map[string]*ir.Global
 	parent *Env
 	module *ir.Module
-	entry  *ir.Block
+	fnc    *ir.Func
+	block  *ir.Block
 }
 
 var ErrUnknownSymbol = errors.New("unknown symbol")
@@ -25,7 +26,7 @@ var AlreadyKnownSymbol = errors.New("already known symbol")
 func NewEnv() *Env {
 	module := ir.NewModule()
 	m := module.NewFunc("main", types.I32)
-	entry := m.NewBlock("")
+	entry := m.NewBlock("entry")
 	lib := make(map[string]*ir.Func)
 	defs := make(map[string]*ir.Global)
 
@@ -45,25 +46,94 @@ func NewEnv() *Env {
 		defs:   defs,
 		parent: nil,
 		module: module,
-		entry:  entry,
+		fnc:    m,
+		block:  entry,
 	}
 }
 
-func (e *Env) Get(id string) (value.Value, error) {
+func (e *Env) NewEnv() *Env {
+	return &Env{
+		env:    make(map[string]value.Value),
+		lib:    e.lib,
+		defs:   e.defs,
+		parent: e,
+		module: nil,
+		fnc:    nil,
+		block:  nil,
+	}
+}
+
+func (e *Env) GetVar(id string) (value.Value, error) {
 	if v, ok := e.env[id]; ok {
 		return v, nil
 	}
 	if e.parent == nil {
 		return nil, ErrUnknownSymbol
 	}
-	return e.parent.Get(id)
+	return e.parent.GetVar(id)
 }
 
-func (e *Env) Set(k string, v value.Value) error {
+func (e *Env) SetVar(k string, v value.Value) error {
 	e.env[k] = v
 	return nil
 }
 
+func (e *Env) ModuleScope() *Env {
+	if e.module != nil || e.parent == nil {
+		return e
+	}
+	return e.parent.ModuleScope()
+}
+
+func (e *Env) FuncScope() *Env {
+	if e.fnc != nil || e.parent == nil {
+		return e
+	}
+	return e.parent.FuncScope()
+}
+
+func (e *Env) BlockScope() *Env {
+	if e.block != nil || e.parent == nil {
+		return e
+	}
+	return e.parent.BlockScope()
+}
+
+func (e *Env) Module() *ir.Module {
+	if e.module != nil || e.parent == nil {
+		return e.module
+	}
+	return e.parent.Module()
+}
+
+func (e *Env) Func() *ir.Func {
+	if e.fnc != nil || e.parent == nil {
+		return e.fnc
+	}
+	return e.parent.Func()
+}
+
+func (e *Env) Block() *ir.Block {
+	if e.block != nil || e.parent == nil {
+		return e.block
+	}
+	return e.parent.Block()
+}
+
 func (e *Env) Generate() {
 	fmt.Println(e.module)
+}
+
+//TODO: GetNewFunc
+//TODO: SetCurrentFunc
+
+func (e *Env) GetNewBlock(id string) *ir.Block {
+	// LLIR: ; <label>:(id)xx
+	block := e.FuncScope().fnc.NewBlock(id)
+	return block
+}
+
+func (e *Env) SetCurrentBlock(b *ir.Block) {
+	//fmt.Printf("SetCurrentBlock: %#v\n", b)
+	e.FuncScope().block = b
 }
