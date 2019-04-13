@@ -53,9 +53,6 @@ func Run(stmts []ast.Stmt, env *Env) error {
 }
 
 func run(stmts []ast.Stmt, env *Env) (result value.Value, err error) {
-	//fmt.Printf("run env:%#v\n", *env)
-	//fmt.Printf("run env.FuncScope:%#v\n", env.FuncScope())
-	//fmt.Printf("run env.FuncScope:%#v\n", env.FuncScope())
 	for _, stmt := range stmts {
 		result, err = runSingleStmt(stmt, env)
 		if err != nil {

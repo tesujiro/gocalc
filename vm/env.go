@@ -78,25 +78,25 @@ func (e *Env) SetVar(k string, v value.Value) error {
 	return nil
 }
 
-func (e *Env) ModuleScope() *Env {
+func (e *Env) moduleScope() *Env {
 	if e.module != nil || e.parent == nil {
 		return e
 	}
-	return e.parent.ModuleScope()
+	return e.parent.moduleScope()
 }
 
-func (e *Env) FuncScope() *Env {
+func (e *Env) funcScope() *Env {
 	if e.fnc != nil || e.parent == nil {
 		return e
 	}
-	return e.parent.FuncScope()
+	return e.parent.funcScope()
 }
 
-func (e *Env) BlockScope() *Env {
+func (e *Env) blockScope() *Env {
 	if e.block != nil || e.parent == nil {
 		return e
 	}
-	return e.parent.BlockScope()
+	return e.parent.blockScope()
 }
 
 func (e *Env) Module() *ir.Module {
@@ -129,11 +129,11 @@ func (e *Env) Generate() {
 
 func (e *Env) GetNewBlock(id string) *ir.Block {
 	// LLIR: ; <label>:(id)xx
-	block := e.FuncScope().fnc.NewBlock(id)
+	block := e.funcScope().fnc.NewBlock(id)
 	return block
 }
 
 func (e *Env) SetCurrentBlock(b *ir.Block) {
 	//fmt.Printf("SetCurrentBlock: %#v\n", b)
-	e.FuncScope().block = b
+	e.funcScope().block = b
 }
