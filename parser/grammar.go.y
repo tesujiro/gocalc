@@ -17,14 +17,17 @@
 %type	<stmt>		stmt
 %type	<stmt>		stmt_if
 %type	<stmts>		stmts
+%type	<stmt>		opt_stmt
 %type	<stmts>		opt_stmts
 %type	<expr>		expr
+%type	<expr>		opt_expr
 
 %token	<token>		NUMBER STRING IDENT
 %token	<token>		PRINT PRINTF
 %token	<token>		TRUE FALSE
 %token	<token>		EQEQ NEQ GE LE ANDAND OROR
 %token	<token>		IF ELSE
+%token	<token>		FOR BREAK CONTINUE
 /*
 %token	<token>	IDENT NUMBER STRING TRUE FALSE NIL
 %token	<token>	EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
@@ -90,6 +93,20 @@ stmt
 		$$ = &ast.PrintStmt{Expr: $2}
 	}
 	| stmt_if
+	{
+		$$ = $1
+	}
+	| FOR opt_stmt ';' opt_expr ';' opt_expr '{' opt_stmts '}'
+	{
+		$$ = &ast.CForLoopStmt{Stmt1: $2, Expr2: $4, Expr3: $6, Stmts: $8}
+	}
+
+opt_stmt
+	:
+	{
+		$$ = nil
+	}
+	| stmt
 	{
 		$$ = $1
 	}
@@ -185,6 +202,16 @@ expr
 	| expr LE expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
+	}
+
+opt_expr
+	:
+	{
+		$$ = nil
+	}
+	| expr
+	{
+		$$ = $1
 	}
 
 opt_term

@@ -16,3 +16,10 @@ type IfStmt struct {
 	Else   []Stmt
 	ElseIf []Stmt
 }
+
+type CForLoopStmt struct {
+	Stmt1 Stmt
+	Expr2 Expr
+	Expr3 Expr
+	Stmts []Stmt
+}

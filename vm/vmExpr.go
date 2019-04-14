@@ -44,7 +44,21 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		if val, err = evalExpr(exp, env); err != nil {
 			return nil, err
 		}
-		if err = env.SetVar(key, val); err != nil {
+		stored_value, err := env.GetVar(key)
+		if err == ErrUnknownSymbol {
+			// LLIR: %x = alloca i32
+			tmp := env.Block().NewAlloca(val.Type())
+			// LLIR: store i32 <u>, i32* %x
+			env.Block().NewStore(val, tmp)
+		} else if err != nil {
+			return nil, err
+		} else {
+			// LLIR: %x = load i32, i32* %y
+			v_value := env.Block().NewLoad(val)
+			// LLIR: store i32 <u>, i32* %x
+			env.Block().NewStore(v_value, stored_value)
+		}
+		if err := env.SetVar(key, val); err != nil {
 			return nil, err
 		}
 		return val, nil

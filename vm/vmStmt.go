@@ -66,6 +66,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 	switch stmt.(type) {
 	case *ast.ExprStmt:
 		return evalExpr(stmt.(*ast.ExprStmt).Expr, env)
+
 	case *ast.IfStmt:
 		var result value.Value
 		ifStmt := stmt.(*ast.IfStmt)
@@ -102,7 +103,60 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		}
 		child.Block().NewBr(nextBlock)
 
-		//thenBlock.NewBr(nextBlock)
+		// next
+		child.SetCurrentBlock(nextBlock)
+		return result, nil
+
+	case *ast.CForLoopStmt:
+		var result value.Value
+		stmt1 := stmt.(*ast.CForLoopStmt).Stmt1
+		expr2 := stmt.(*ast.CForLoopStmt).Expr2
+		expr3 := stmt.(*ast.CForLoopStmt).Expr3
+		stmts := stmt.(*ast.CForLoopStmt).Stmts
+		child := env.NewEnv()
+		condBlock := child.GetNewBlock("for_cond")
+		loopBlock := child.GetNewBlock("for_loop")
+		nextBlock := child.GetNewBlock("")
+
+		// init
+		if stmt1 != nil {
+			_, err := run([]ast.Stmt{stmt1}, child)
+			if err != nil {
+				return nil, fmt.Errorf("for init stmt error: %v", err)
+			}
+		}
+		child.Block().NewBr(condBlock)
+
+		// loop Condition
+		child.SetCurrentBlock(condBlock)
+		if expr2 == nil {
+			child.Block().NewBr(loopBlock)
+		} else {
+			cond, err := evalExpr(expr2, child)
+			if err != nil {
+				return nil, fmt.Errorf("for condition expr error: %v", err)
+			}
+			cond_r := env.Block().NewLoad(cond)
+			child.Block().NewCondBr(cond_r, loopBlock, nextBlock)
+		}
+
+		// loop
+		child.SetCurrentBlock(loopBlock)
+		ret, err := run(stmts, child)
+		if err != nil {
+			return nil, fmt.Errorf("for loop stmts error: %v", err)
+		}
+		result = ret
+
+		if expr3 != nil {
+			_, err := evalExpr(expr3, child)
+			if err != nil {
+				return nil, fmt.Errorf("for final expr error: %v", err)
+			}
+		}
+		child.Block().NewBr(condBlock)
+
+		// next
 		child.SetCurrentBlock(nextBlock)
 		return result, nil
 

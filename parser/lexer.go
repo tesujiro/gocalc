@@ -43,17 +43,17 @@ type Scanner struct {
 
 // opName is correction of operation names.
 var opName = map[string]int{
-	"print": PRINT,
-	"if":    IF,
-	"else":  ELSE,
+	"print":    PRINT,
+	"if":       IF,
+	"else":     ELSE,
+	"for":      FOR,
+	"break":    BREAK,
+	"continue": CONTINUE,
 	/*
 		"BEGIN":    BEGIN,
 		"END":      END,
 		"delete":   DELETE,
 		"printf":   PRINTF,
-		"for":      FOR,
-		"break":    BREAK,
-		"continue": CONTINUE,
 		"next":     NEXT,
 		"in":       IN,
 		"true":     TRUE,
