@@ -51,6 +51,7 @@ func TestCalc(t *testing.T) {
 		{script: "i=1;print i", ok: "1\n"},
 		{script: "i=1;j=2;print i*10+j", ok: "12\n"},
 		{script: "i=1>0;print i", ok: "1\n"},
+		{script: "print j", ok: "Compile error: unknown symbol\n", rc: 1},
 
 		//IF STMT
 		{script: "if 1>0 {print 1};print 2", ok: "1\n2\n"},
@@ -105,7 +106,7 @@ func TestCalc(t *testing.T) {
 			}
 			rc := _main()
 			if rc != test.rc && !strings.Contains(test.ok, "error") {
-				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
+				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test.script)
 			}
 
 			//close(chanDone) //NG

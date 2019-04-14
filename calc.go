@@ -51,7 +51,7 @@ func runScript(source string) int {
 	}
 	err := vm.Run(ast, env)
 	if err != nil {
-		fmt.Printf("Runtime error: %v \n", err)
+		fmt.Printf("Compile error: %v \n", err)
 		return 1
 	}
 
