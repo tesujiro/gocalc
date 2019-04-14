@@ -41,5 +41,5 @@ type CompExpr struct {
 	Left     Expr
 	Operator string
 	Right    Expr
-	After    bool
+	//After    bool
 }

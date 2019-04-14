@@ -44,6 +44,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		if val, err = evalExpr(exp, env); err != nil {
 			return nil, err
 		}
+
 		stored_value, err := env.GetVar(key)
 		if err == ErrUnknownSymbol {
 			// LLIR: %x = alloca i32
@@ -119,10 +120,50 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 
 		return value.Value(tmp), nil
 
+	case *ast.CompExpr:
+		left := expr.(*ast.CompExpr).Left
+		right := expr.(*ast.CompExpr).Right
+		operator := expr.(*ast.CompExpr).Operator
+
+		if operator == "++" || operator == "--" {
+			right = &ast.NumExpr{Literal: "1"}
+		}
+		result, err := evalExpr(&ast.BinOpExpr{Left: left, Operator: operator[0:1], Right: right}, env)
+		if err != nil {
+			return nil, err
+		}
+
+		after_val, err := evalAssExpr(left.(*ast.IdentExpr).Literal, result, env)
+		if err != nil {
+			return nil, err
+		}
+		return after_val, nil
+
 	case *ast.ParentExpr:
 		sub := expr.(*ast.ParentExpr).SubExpr
 		return evalExpr(sub, env)
 	default:
 		return nil, fmt.Errorf("invalid expression: %v", reflect.TypeOf(expr))
 	}
+}
+
+func evalAssExpr(key string, val value.Value, env *Env) (value.Value, error) {
+	stored_value, err := env.GetVar(key)
+	if err == ErrUnknownSymbol {
+		// LLIR: %x = alloca i32
+		tmp := env.Block().NewAlloca(val.Type())
+		// LLIR: store i32 <u>, i32* %x
+		env.Block().NewStore(val, tmp)
+	} else if err != nil {
+		return nil, err
+	} else {
+		// LLIR: %x = load i32, i32* %y
+		v_value := env.Block().NewLoad(val)
+		// LLIR: store i32 <u>, i32* %x
+		env.Block().NewStore(v_value, stored_value)
+	}
+	if err := env.SetVar(key, val); err != nil {
+		return nil, err
+	}
+	return val, nil
 }

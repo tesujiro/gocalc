@@ -53,6 +53,12 @@ func TestCalc(t *testing.T) {
 		{script: "i=1>0;print i", ok: "1\n"},
 		{script: "print j", ok: "Compile error: unknown symbol\n", rc: 1},
 
+		//COMPOSITE EXPRESSION
+		{script: "i=1;i=++i;print i", ok: "2\n"},
+		{script: "i=1;i=--i;print i", ok: "0\n"},
+		{script: "i=1;i=i++;print i", ok: "2\n"},
+		{script: "i=1;i=i--;print i", ok: "0\n"},
+
 		//IF STMT
 		{script: "if 1>0 {print 1};print 2", ok: "1\n2\n"},
 		{script: "if 1<0 {print 1};print 2", ok: "2\n"},
@@ -60,7 +66,7 @@ func TestCalc(t *testing.T) {
 		{script: "if 1<0 {print 1}else{print 2};print 3", ok: "2\n3\n"},
 
 		//FOR STMT
-		{script: "for i=1;i<5;i=i+1{print i}", ok: "1\n2\n3\n4\n"},
+		{script: "for i=1;i<5;i=++i{print i}", ok: "1\n2\n3\n4\n"},
 	}
 
 	//realStdin := os.Stdin

@@ -28,10 +28,10 @@
 %token	<token>		EQEQ NEQ GE LE ANDAND OROR
 %token	<token>		IF ELSE
 %token	<token>		FOR BREAK CONTINUE
+%token	<token>		PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 /*
-%token	<token>	IDENT NUMBER STRING TRUE FALSE NIL
-%token	<token>	EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
-%token	<token>	PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
+%token	<token>	STRING TRUE FALSE NIL
+%token	<token>	LEN 
 */
 
 %right '='
@@ -140,6 +140,23 @@ expr
 	| IDENT '=' expr
 	{
 		$$ = &ast.AssExpr{Left: $1.Literal, Right: $3}
+	}
+	/* COMPOSITE EXPRESSION */
+	| IDENT PLUSPLUS
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "++"}
+	}
+	| IDENT MINUSMINUS
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "--"}
+	}
+	| PLUSPLUS IDENT
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $2.Literal}, Operator: "++"}
+	}
+	| MINUSMINUS IDENT
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $2.Literal}, Operator: "--"}
 	}
 	| NUMBER
 	{

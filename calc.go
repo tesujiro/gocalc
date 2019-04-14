@@ -11,6 +11,7 @@ import (
 	"github.com/tesujiro/gocalc/vm"
 )
 
+var print_ast = flag.Bool("a", false, "print AST")
 var print_ir = flag.Bool("i", false, "print llvm ir")
 var no_exec = flag.Bool("n", false, "no execution")
 
@@ -49,6 +50,12 @@ func runScript(source string) int {
 		fmt.Printf("Syntax error: %v \n", parseError)
 		return 1
 	}
+	/*
+		//TODO: DUMP AST
+		if *print_ast {
+			fmt.Printf("%#v\n", ast)
+		}
+	*/
 	err := vm.Run(ast, env)
 	if err != nil {
 		fmt.Printf("Compile error: %v \n", err)

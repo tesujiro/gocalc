@@ -161,10 +161,10 @@ retry:
 		case '+':
 			s.next()
 			switch s.peek() {
+			case '+':
+				tok = PLUSPLUS
+				lit = "++"
 			/*
-				case '+':
-					tok = PLUSPLUS
-					lit = "++"
 				case '=':
 					tok = PLUSEQ
 					lit = "+="
@@ -177,10 +177,10 @@ retry:
 		case '-':
 			s.next()
 			switch s.peek() {
+			case '-':
+				tok = MINUSMINUS
+				lit = "--"
 			/*
-				case '-':
-					tok = MINUSMINUS
-					lit = "--"
 				case '=':
 					tok = MINUSEQ
 					lit = "-="

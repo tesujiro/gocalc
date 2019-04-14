@@ -6,7 +6,7 @@ all : calc.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./parser/grammar.g
 	gofmt -s -w ./parser
 
 .PHONY: test
-test: ./*_test.go
+test: ./*_test.go ./parser/grammar.go
 	go vet ./...
 	go test -v -count=1 . -coverpkg ./...
 
