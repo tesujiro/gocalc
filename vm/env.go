@@ -120,8 +120,8 @@ func (e *Env) Block() *ir.Block {
 	return e.parent.Block()
 }
 
-func (e *Env) Generate() {
-	fmt.Println(e.module)
+func (e *Env) Generate() string {
+	return fmt.Sprintln(e.module)
 }
 
 //TODO: GetNewFunc
