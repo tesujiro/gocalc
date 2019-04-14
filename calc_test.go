@@ -21,9 +21,45 @@ type test struct {
 func TestCalc(t *testing.T) {
 	tests := []test{
 		//BASIC EXPRESSION
+		{script: "print 1", ok: "1\n"},
+		{script: "print 0", ok: "0\n"},
+		//{script: "print -1", ok: "-1\n"},  //TODO
 		{script: "print 1+1", ok: "2\n"},
 		{script: "print 1+1;#comment", ok: "2\n"},
 		{script: "print 1+2", ok: "3\n"},
+		{script: "print 2-1", ok: "1\n"},
+		{script: "print 1-2", ok: "-1\n"},
+		{script: "print 1*2", ok: "2\n"},
+
+		//BOOL EXPRESSION
+		{script: "print 2>1", ok: "1\n"},
+		{script: "print 2<1", ok: "0\n"},
+		{script: "print 1>=1", ok: "1\n"},
+		{script: "print 0>=1", ok: "0\n"},
+		{script: "print 1<=1", ok: "1\n"},
+		{script: "print 1<=0", ok: "0\n"},
+		{script: "print 1<=1&&2>=2", ok: "1\n"},
+		{script: "print 1<=1&&1>=2", ok: "0\n"},
+		{script: "print 1<=0&&2>=2", ok: "0\n"},
+		{script: "print 1<=0&&1>=2", ok: "0\n"},
+		{script: "print 1<=1||2>=2", ok: "1\n"},
+		{script: "print 1<=1||1>=2", ok: "1\n"},
+		{script: "print 1<=0||2>=2", ok: "1\n"},
+		{script: "print 1<=0||1>=2", ok: "0\n"},
+
+		//ASSIGNMENT
+		{script: "i=1;print i", ok: "1\n"},
+		{script: "i=1;j=2;print i*10+j", ok: "12\n"},
+		{script: "i=1>0;print i", ok: "1\n"},
+
+		//IF STMT
+		{script: "if 1>0 {print 1};print 2", ok: "1\n2\n"},
+		{script: "if 1<0 {print 1};print 2", ok: "2\n"},
+		{script: "if 1>0 {print 1}else{print 2};print 3", ok: "1\n3\n"},
+		{script: "if 1<0 {print 1}else{print 2};print 3", ok: "2\n3\n"},
+
+		//FOR STMT
+		{script: "for i=1;i<5;i=i+1{print i}", ok: "1\n2\n3\n4\n"},
 	}
 
 	//realStdin := os.Stdin
@@ -72,12 +108,6 @@ func TestCalc(t *testing.T) {
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
 			}
 
-			/*
-				rc := runScript(script_reader, os.Stdin)
-				if rc != 0 {
-					t.Fatal("runscript return code:", rc)
-				}
-			*/
 			//close(chanDone) //NG
 			writeToOut.Close()
 			wg.Done()
