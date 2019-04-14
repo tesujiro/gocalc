@@ -15,6 +15,10 @@ var print_ir = flag.Bool("i", false, "print llvm ir")
 var no_exec = flag.Bool("n", false, "no execution")
 
 func main() {
+	os.Exit(_main())
+}
+
+func _main() int {
 
 	//parser.TraceLexer()
 	flag.Parse()
@@ -23,7 +27,7 @@ func main() {
 	if len(args) < 1 {
 		fmt.Println("No expression error!")
 		fmt.Printf("ex: %v '(1+1)*3+10' | lli ; echo $?\n", os.Args[0])
-		os.Exit(1)
+		return 1
 	}
 
 	for _, source := range args {
@@ -31,9 +35,10 @@ func main() {
 		//result := runScript(strings.NewReader(source))
 		result := runScript(source)
 		if result != 0 {
-			os.Exit(result)
+			return result
 		}
 	}
+	return 0
 }
 
 func runScript(source string) int {
