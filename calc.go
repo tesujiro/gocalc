@@ -19,7 +19,6 @@ func main() {
 	//parser.TraceLexer()
 	flag.Parse()
 	args := flag.Args()
-	fmt.Printf("args=%#v\n", args)
 
 	if len(args) < 1 {
 		fmt.Println("No expression error!")
