@@ -74,20 +74,6 @@ func (e *Env) GetVar(id string) (value.Value, error) {
 }
 
 func (e *Env) SetVar(k string, v value.Value) error {
-	stored_value, err := e.GetVar(k)
-	if err == ErrUnknownSymbol {
-		// LLIR: %x = alloca i32
-		tmp := e.Block().NewAlloca(v.Type())
-		// LLIR: store i32 <u>, i32* %x
-		e.Block().NewStore(v, tmp)
-	} else if err != nil {
-		return err
-	} else {
-		// LLIR: %x = load i32, i32* %y
-		v_value := e.Block().NewLoad(v)
-		// LLIR: store i32 <u>, i32* %x
-		e.Block().NewStore(v_value, stored_value)
-	}
 	e.env[k] = v
 	return nil
 }
