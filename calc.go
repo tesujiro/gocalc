@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -10,17 +11,23 @@ import (
 	"github.com/tesujiro/gocalc/vm"
 )
 
+var print_ir = flag.Bool("i", false, "print llvm ir")
+var no_exec = flag.Bool("n", false, "no execution")
+
 func main() {
 
 	//parser.TraceLexer()
+	flag.Parse()
+	args := flag.Args()
+	fmt.Printf("args=%#v\n", args)
 
-	if len(os.Args) < 2 {
+	if len(args) < 1 {
 		fmt.Println("No expression error!")
 		fmt.Printf("ex: %v '(1+1)*3+10' | lli ; echo $?\n", os.Args[0])
 		os.Exit(1)
 	}
 
-	for _, source := range os.Args[1:] {
+	for _, source := range args {
 		//fmt.Printf("source: %v\n", source)
 		//result := runScript(strings.NewReader(source))
 		result := runScript(source)
@@ -31,6 +38,7 @@ func main() {
 }
 
 func runScript(source string) int {
+
 	env := vm.NewEnv()
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
@@ -44,6 +52,14 @@ func runScript(source string) int {
 	}
 
 	src_lli := env.Generate()
+
+	if *print_ir {
+		fmt.Println(src_lli)
+	}
+
+	if *no_exec {
+		return 0
+	}
 
 	// run llvm
 	llvm_run := []string{"lli"}
