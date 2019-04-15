@@ -27,7 +27,7 @@ func _main() int {
 
 	if len(args) < 1 {
 		fmt.Println("No expression error!")
-		fmt.Printf("ex: %v '(1+1)*3+10' | lli ; echo $?\n", os.Args[0])
+		fmt.Printf("ex: %v '(1+1)*3+10' ; echo $?\n", os.Args[0])
 		return 1
 	}
 

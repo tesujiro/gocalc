@@ -30,8 +30,16 @@ func TestCalc(t *testing.T) {
 		{script: "print 2-1", ok: "1\n"},
 		{script: "print 1-2", ok: "-1\n"},
 		{script: "print 1*2", ok: "2\n"},
+		{script: "print (1+30)*2", ok: "62\n"},
+		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
+		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 
 		//BOOL EXPRESSION
+		{script: "print 1==1", ok: "1\n"},
+		{script: "print 1==0", ok: "0\n"},
+		{script: "print 1!=1", ok: "0\n"},
+		{script: "print 1!=0", ok: "1\n"},
+		{script: "print 2>1", ok: "1\n"},
 		{script: "print 2>1", ok: "1\n"},
 		{script: "print 2<1", ok: "0\n"},
 		{script: "print 1>=1", ok: "1\n"},
