@@ -23,6 +23,8 @@ func TestCalc(t *testing.T) {
 		//BASIC EXPRESSION
 		{script: "print 1", ok: "1\n"},
 		{script: "print 0", ok: "0\n"},
+		{script: "print +1", ok: "1\n"},
+		{script: "print -1", ok: "-1\n"},
 		//{script: "print -1", ok: "-1\n"},  //TODO
 		{script: "print 1+1", ok: "2\n"},
 		{script: "print 1+1;#comment", ok: "2\n"},
@@ -30,6 +32,7 @@ func TestCalc(t *testing.T) {
 		{script: "print 2-1", ok: "1\n"},
 		{script: "print 1-2", ok: "-1\n"},
 		{script: "print 1*2", ok: "2\n"},
+		{script: "print -1*-2", ok: "2\n"},
 		{script: "print (1+30)*2", ok: "62\n"},
 		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
 		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
@@ -39,6 +42,8 @@ func TestCalc(t *testing.T) {
 		{script: "print 1==0", ok: "0\n"},
 		{script: "print 1!=1", ok: "0\n"},
 		{script: "print 1!=0", ok: "1\n"},
+		{script: "print !(1==1)", ok: "0\n"},
+		{script: "print !(1==0)", ok: "1\n"},
 		{script: "print 2>1", ok: "1\n"},
 		{script: "print 2>1", ok: "1\n"},
 		{script: "print 2<1", ok: "0\n"},
@@ -74,7 +79,7 @@ func TestCalc(t *testing.T) {
 		{script: "if 1<0 {print 1}else{print 2};print 3", ok: "2\n3\n"},
 
 		//FOR STMT
-		{script: "for i=1;i<5;i=++i{print i}", ok: "1\n2\n3\n4\n"},
+		{script: "for i=1;i<5;i++{print i}", ok: "1\n2\n3\n4\n"},
 	}
 
 	//realStdin := os.Stdin

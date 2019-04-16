@@ -36,6 +36,40 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		}
 		return v, nil
 
+	case *ast.UnaryExpr:
+		val, err := evalExpr(expr.(*ast.UnaryExpr).Expr, env)
+		if err != nil {
+			return nil, err
+		}
+		// LLIR: %y = load i32, i32* %x
+		r := env.Block().NewLoad(val)
+
+		/* switch r.Type() {
+		case types.I1, types.I32:
+		default:
+		} */
+
+		var result value.Value
+		switch expr.(*ast.UnaryExpr).Operator {
+		case "+":
+			return val, nil
+		case "-":
+			// LLIR: %r= sub i32 0, %r
+			result = env.Block().NewSub(constant.NewInt(types.I32, 0), r)
+		case "!":
+			// LLIR: %r= fneg %r
+			result = env.Block().NewICmp(enum.IPredEQ, constant.NewInt(types.I1, 0), r)
+		default:
+			return nil, fmt.Errorf("invalid unary type")
+		}
+
+		// LLIR: %x = alloca i32
+		tmp := env.Block().NewAlloca(result.Type())
+		// LLIR: store i32 <u>, i32* %x
+		env.Block().NewStore(result, tmp)
+
+		return value.Value(tmp), nil
+
 	case *ast.AssExpr:
 		assExpr := expr.(*ast.AssExpr)
 		key, exp := assExpr.Left, assExpr.Right
