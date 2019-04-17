@@ -174,6 +174,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 			zero := constant.NewInt(types.I32, 0)
 			env.Block().NewCall(env.lib["printf"], constant.NewGetElementPtr(env.defs[".print_int"], zero, zero), r)
 			return v, nil
+		case types.Double:
+			// LLIR: %8 = call i32 (i8*, ...) @printf(i8* getelementptr ([12 x i8], [12 x i8]* @.str.result, i32 0, i32 0), double %7)
+			zero := constant.NewInt(types.I32, 0)
+			env.Block().NewCall(env.lib["printf"], constant.NewGetElementPtr(env.defs[".print_float"], zero, zero), r)
+			return v, nil
 		default:
 			return nil, fmt.Errorf("print invalid value type : %v", v.Type())
 		}

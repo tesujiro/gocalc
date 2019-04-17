@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/enum"
@@ -17,16 +18,34 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 	switch expr.(type) {
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
-		i64, err := strconv.ParseInt(lit, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("convert number err(%v):%v", lit, err)
+		var num_type types.Type
+		// float
+		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
+			f, err := strconv.ParseFloat(lit, 64)
+			if err != nil {
+				return nil, err
+			}
+			num_type = types.Double // double float NOT types.Float
+			// LLIR: %x = alloca f32
+			tmp := env.Block().NewAlloca(num_type)
+			// LLIR: store f32 <u>, f32* %x
+			i1 := constant.NewFloat(num_type.(*types.FloatType), f)
+			env.Block().NewStore(i1, tmp)
+			return value.Value(tmp), nil
+		} else {
+			// integer
+			i64, err := strconv.ParseInt(lit, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("convert number err(%v):%v", lit, err)
+			}
+			num_type = types.I32
+			// LLIR: %x = alloca i32
+			tmp := env.Block().NewAlloca(num_type)
+			// LLIR: store i32 <u>, i32* %x
+			i1 := constant.NewInt(num_type.(*types.IntType), i64)
+			env.Block().NewStore(i1, tmp)
+			return value.Value(tmp), nil
 		}
-		// LLIR: %x = alloca i32
-		tmp := env.Block().NewAlloca(types.I32)
-		// LLIR: store i32 <u>, i32* %x
-		i1 := constant.NewInt(types.I32, i64)
-		env.Block().NewStore(i1, tmp)
-		return value.Value(tmp), nil
 
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal

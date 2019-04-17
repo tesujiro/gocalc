@@ -37,6 +37,9 @@ func TestCalc(t *testing.T) {
 		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
 		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 
+		// Float
+		{script: "print 1.23", ok: "1.23\n"},
+
 		//BOOL EXPRESSION
 		{script: "print 1==1", ok: "1\n"},
 		{script: "print 1==0", ok: "0\n"},

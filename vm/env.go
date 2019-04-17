@@ -38,6 +38,7 @@ func NewEnv() *Env {
 
 	// LLIR: @.str.result = global [12 x i8] c"Result : %d\0A"
 	defs[".print_int"] = module.NewGlobalDef(".print_int", constant.NewCharArrayFromString("%d\n\x00"))
+	defs[".print_float"] = module.NewGlobalDef(".print_float", constant.NewCharArrayFromString("%g\n\x00"))
 	defs[".result"] = module.NewGlobalDef(".result", constant.NewCharArrayFromString("Result : %d\n\x00"))
 
 	return &Env{
