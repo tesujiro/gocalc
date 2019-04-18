@@ -158,6 +158,26 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 				// LLIR: %r= add i32 %l, %r
 				result = env.Block().NewFMul(l, r)
 			}
+		case "/":
+			if arithmetic_type != types.Double {
+				// LLIR: %r= sdiv i32 %l, %r
+				result = env.Block().NewSDiv(l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				// LLIR: %r= fdiv double %l, %r
+				result = env.Block().NewFDiv(l, r)
+			}
+		case "%":
+			if arithmetic_type != types.Double {
+				// LLIR: %r= srem i32 %l, %r
+				result = env.Block().NewSRem(l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				// LLIR: %r= frem double %l, %r
+				result = env.Block().NewFRem(l, r)
+			}
 		case "<":
 			result = env.Block().NewICmp(enum.IPredSLT, l_register, r_register)
 		case ">":

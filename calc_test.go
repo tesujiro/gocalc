@@ -32,6 +32,9 @@ func TestCalc(t *testing.T) {
 		{script: "print 2-1", ok: "1\n"},
 		{script: "print 1-2", ok: "-1\n"},
 		{script: "print 1*2", ok: "2\n"},
+		{script: "print 2/1", ok: "2\n"},
+		{script: "print 7/3", ok: "2\n"},
+		{script: "print 7%3", ok: "1\n"},
 		{script: "print -1*-2", ok: "2\n"},
 		{script: "print (1+30)*2", ok: "62\n"},
 		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
@@ -45,6 +48,8 @@ func TestCalc(t *testing.T) {
 		{script: "print 1.23-2.15", ok: "-0.92\n"},
 		{script: "print 1.23*2", ok: "2.46\n"},
 		{script: "print 1.23*2.15", ok: "2.6445\n"},
+		{script: "print 1.23/2", ok: "0.615\n"},
+		{script: "print 2.23%2", ok: "0.23\n"},
 
 		//BOOL EXPRESSION
 		{script: "print 1==1", ok: "1\n"},
