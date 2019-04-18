@@ -39,6 +39,12 @@ func TestCalc(t *testing.T) {
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},
+		{script: "print 1.23+2", ok: "3.23\n"},
+		{script: "print 1.23+2.15", ok: "3.38\n"},
+		{script: "print 1.23-2", ok: "-0.77\n"},
+		{script: "print 1.23-2.15", ok: "-0.92\n"},
+		{script: "print 1.23*2", ok: "2.46\n"},
+		{script: "print 1.23*2.15", ok: "2.6445\n"},
 
 		//BOOL EXPRESSION
 		{script: "print 1==1", ok: "1\n"},

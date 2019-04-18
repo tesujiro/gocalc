@@ -118,17 +118,46 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		// LLIR: %x = load i32, i32* %y
 		r_register := env.Block().NewLoad(right)
 
+		/*
+			if l_register.Type() == types.Double || r_register.Type() == types.Double {
+				arithmetic_type = types.Double
+			}
+		*/
+		l_type, r_type := l_register.Type(), r_register.Type()
+		arithmetic_type := precedenceOfTypes(l_type, r_type)
+
 		var result value.Value
 		switch expr.(*ast.BinOpExpr).Operator {
 		case "+":
-			// LLIR: %r= add i32 %l, %r
-			result = env.Block().NewAdd(l_register, r_register)
+			if arithmetic_type != types.Double {
+				// LLIR: %r= add i32 %l, %r
+				result = env.Block().NewAdd(l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				// LLIR: %r= add i32 %l, %r
+				result = env.Block().NewFAdd(l, r)
+			}
 		case "-":
-			// LLIR: %r= sub i32 %l, %r
-			result = env.Block().NewSub(l_register, r_register)
+			if arithmetic_type != types.Double {
+				// LLIR: %r= sub i32 %l, %r
+				result = env.Block().NewSub(l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				// LLIR: %r= add i32 %l, %r
+				result = env.Block().NewFSub(l, r)
+			}
 		case "*":
-			// LLIR: %r= mul i32 %l, %r
-			result = env.Block().NewMul(l_register, r_register)
+			if arithmetic_type != types.Double {
+				// LLIR: %r= mul i32 %l, %r
+				result = env.Block().NewMul(l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				// LLIR: %r= add i32 %l, %r
+				result = env.Block().NewFMul(l, r)
+			}
 		case "<":
 			result = env.Block().NewICmp(enum.IPredSLT, l_register, r_register)
 		case ">":
