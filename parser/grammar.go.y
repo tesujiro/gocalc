@@ -140,6 +140,26 @@ expr
 		$$ = &ast.AssExpr{Left: $1.Literal, Right: $3}
 	}
 	/* COMPOSITE EXPRESSION */
+	| IDENT PLUSEQ expr
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "+=", Right: $3}
+	}
+	| IDENT MINUSEQ expr
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "-=", Right: $3}
+	}
+	| IDENT MULEQ expr
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "*=", Right: $3}
+	}
+	| IDENT DIVEQ expr
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "/=", Right: $3}
+	}
+	| IDENT MODEQ expr
+	{
+		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "%=", Right: $3}
+	}
 	| IDENT PLUSPLUS
 	{
 		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "++"}

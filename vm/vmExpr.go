@@ -238,7 +238,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 
 func evalAssExpr(key string, val value.Value, env *Env) (value.Value, error) {
 	stored_value, err := env.GetVar(key)
-	if err == ErrUnknownSymbol {
+	if err == ErrUnknownSymbol || !val.Type().Equal(stored_value.Type()) {
 		// LLIR: %x = alloca i32
 		tmp := env.Block().NewAlloca(val.Type())
 		// LLIR: store i32 <u>, i32* %x

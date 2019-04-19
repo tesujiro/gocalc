@@ -164,11 +164,9 @@ retry:
 			case '+':
 				tok = PLUSPLUS
 				lit = "++"
-			/*
-				case '=':
-					tok = PLUSEQ
-					lit = "+="
-			*/
+			case '=':
+				tok = PLUSEQ
+				lit = "+="
 			default:
 				s.back()
 				tok = int(ch)
@@ -180,11 +178,9 @@ retry:
 			case '-':
 				tok = MINUSMINUS
 				lit = "--"
-			/*
-				case '=':
-					tok = MINUSEQ
-					lit = "-="
-			*/
+			case '=':
+				tok = MINUSEQ
+				lit = "-="
 			default:
 				s.back()
 				tok = int(ch)
@@ -193,11 +189,9 @@ retry:
 		case '*':
 			s.next()
 			switch s.peek() {
-			/*
-				case '=':
-					tok = MULEQ
-					lit = "*="
-			*/
+			case '=':
+				tok = MULEQ
+				lit = "*="
 			default:
 				s.back()
 				tok = int(ch)
@@ -207,11 +201,9 @@ retry:
 			//fmt.Println("in lexer: QUO")
 			s.next()
 			switch s.peek() {
-			/*
-				case '=': //TODO:  ??
-					tok = DIVEQ
-					lit = "/="
-			*/
+			case '=': //TODO:  ??
+				tok = DIVEQ
+				lit = "/="
 			/*
 				case '*':
 					for {
@@ -236,11 +228,9 @@ retry:
 		case '%':
 			s.next()
 			switch s.peek() {
-			/*
-				case '=':
-					tok = MODEQ
-					lit = "%="
-			*/
+			case '=':
+				tok = MODEQ
+				lit = "%="
 			default:
 				s.back()
 				tok = int(ch)

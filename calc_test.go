@@ -76,15 +76,28 @@ func TestCalc(t *testing.T) {
 
 		//ASSIGNMENT
 		{script: "i=1;print i", ok: "1\n"},
+		{script: "i=1;i=2.3;print i", ok: "2.3\n"},
+		{script: "i=1.2;print i", ok: "1.2\n"},
 		{script: "i=1;j=2;print i*10+j", ok: "12\n"},
 		{script: "i=1>0;print i", ok: "1\n"},
 		{script: "print j", ok: "Compile error: unknown symbol\n", rc: 1},
 
 		//COMPOSITE EXPRESSION
+		{script: "i=1;++i;print i", ok: "2\n"},
+		{script: "i=1;i++;print i", ok: "2\n"},
+		{script: "i=1;--i;print i", ok: "0\n"},
+		{script: "i=1;i--;print i", ok: "0\n"},
 		{script: "i=1;i=++i;print i", ok: "2\n"},
 		{script: "i=1;i=--i;print i", ok: "0\n"},
 		{script: "i=1;i=i++;print i", ok: "2\n"},
 		{script: "i=1;i=i--;print i", ok: "0\n"},
+		{script: "i=1;i+=2;print i", ok: "3\n"},
+		{script: "i=1;i+=1.2;print i", ok: "2.2\n"},
+		{script: "i=1;i-=2;print i", ok: "-1\n"},
+		{script: "i=1.1;i-=1.2;print i", ok: "-0.1\n"},
+		{script: "i=1.1;i*=1.2;print i", ok: "1.32\n"},
+		{script: "i=17;i/=4;print i", ok: "4\n"},
+		{script: "i=17;i%=4;print i", ok: "1\n"},
 
 		//IF STMT
 		{script: "if 1>0 {print 1};print 2", ok: "1\n2\n"},
@@ -104,6 +117,8 @@ func TestCalc(t *testing.T) {
 	for _, test := range tests {
 		case_number++
 		wg := &sync.WaitGroup{}
+
+		//fmt.Printf("TEST[%v] %v\n", case_number, test.script)
 
 		// OUT PIPE
 		readFromOut, writeToOut, err := os.Pipe()
