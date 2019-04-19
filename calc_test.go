@@ -112,9 +112,15 @@ func TestCalc(t *testing.T) {
 		{script: "if 1<0 {print 1};print 2", ok: "2\n"},
 		{script: "if 1>0 {print 1}else{print 2};print 3", ok: "1\n3\n"},
 		{script: "if 1<0 {print 1}else{print 2};print 3", ok: "2\n3\n"},
+		{script: "i=0;if i>0 {print 1};print 2", ok: "2\n"},
+		{script: "i=1;if i>0 {print 1};print 2", ok: "1\n2\n"},
+		{script: "i=0;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "3\n"},
+		{script: "i=1;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "2\n3\n"},
+		{script: "i=2;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "1\n3\n"},
 
 		//FOR STMT
 		{script: "for i=1;i<5;i++{print i}", ok: "1\n2\n3\n4\n"},
+		{script: "for i=1;i<5;i++{for j=1;j<3;j++{print i}}", ok: "1\n1\n2\n2\n3\n3\n4\n4\n"},
 	}
 
 	//realStdin := os.Stdin

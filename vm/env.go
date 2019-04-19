@@ -41,6 +41,10 @@ func NewEnv() *Env {
 	defs[".print_float"] = module.NewGlobalDef(".print_float", constant.NewCharArrayFromString("%g\n\x00"))
 	defs[".result"] = module.NewGlobalDef(".result", constant.NewCharArrayFromString("Result : %d\n\x00"))
 
+	// add error block
+	//errBlock := m.NewBlock("error")
+	//_ = errBlock
+
 	return &Env{
 		env:    make(map[string]value.Value),
 		lib:    lib,
@@ -128,9 +132,13 @@ func (e *Env) Generate() string {
 //TODO: GetNewFunc
 //TODO: SetCurrentFunc
 
+var label_number = 0
+
 func (e *Env) GetNewBlock(id string) *ir.Block {
+	label_number++
+	label := fmt.Sprintf("%d:%s", label_number, id)
 	// LLIR: ; <label>:(id)xx
-	block := e.funcScope().fnc.NewBlock(id)
+	block := e.funcScope().fnc.NewBlock(label)
 	return block
 }
 

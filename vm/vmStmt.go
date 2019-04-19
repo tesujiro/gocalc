@@ -77,9 +77,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		}
 		result = cond
 
-		thenBlock := child.GetNewBlock("")
-		elseBlock := child.GetNewBlock("")
-		nextBlock := child.GetNewBlock("")
+		thenBlock := child.GetNewBlock("then")
+		elseBlock := child.GetNewBlock("else")
+		nextBlock := child.GetNewBlock("next")
 		cond_r := env.Block().NewLoad(cond)
 		child.Block().NewCondBr(cond_r, thenBlock, elseBlock)
 
@@ -114,9 +114,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		expr3 := stmt.(*ast.CForLoopStmt).Expr3
 		stmts := stmt.(*ast.CForLoopStmt).Stmts
 		child := env.NewEnv()
-		condBlock := child.GetNewBlock("")
-		loopBlock := child.GetNewBlock("")
-		nextBlock := child.GetNewBlock("")
+		condBlock := child.GetNewBlock("cond")
+		loopBlock := child.GetNewBlock("loop")
+		nextBlock := child.GetNewBlock("next")
 
 		// init
 		if stmt1 != nil {

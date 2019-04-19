@@ -165,6 +165,8 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			} else {
 				l := toDouble(env, l_register)
 				r := toDouble(env, r_register)
+				//TODO: if r is zero "division by zero"
+
 				// LLIR: %r= fdiv double %l, %r
 				result = env.Block().NewFDiv(l, r)
 			}
@@ -175,6 +177,8 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			} else {
 				l := toDouble(env, l_register)
 				r := toDouble(env, r_register)
+				//TODO: if r is zero "division by zero"
+
 				// LLIR: %r= frem double %l, %r
 				result = env.Block().NewFRem(l, r)
 			}
