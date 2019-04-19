@@ -22,6 +22,7 @@ func TestCalc(t *testing.T) {
 	tests := []test{
 		//STATEMENT
 		{script: "1", ok: ""},
+		{script: "", rc: 1, ok: ""},
 		{script: "1\n2", ok: ""},
 		{script: "xxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 		{script: "((", rc: 1, ok: "syntax error\n"},
@@ -30,7 +31,7 @@ func TestCalc(t *testing.T) {
 		{script: "print 0", ok: "0\n"},
 		{script: "print +1", ok: "1\n"},
 		{script: "print -1", ok: "-1\n"},
-		//{script: "print -1", ok: "-1\n"},  //TODO
+		{script: "print -1", ok: "-1\n"},
 		{script: "print 1+1", ok: "2\n"},
 		{script: "print 1+1;#comment", ok: "2\n"},
 		{script: "print 1+2", ok: "3\n"},
@@ -55,6 +56,7 @@ func TestCalc(t *testing.T) {
 		{script: "print 1.23*2.15", ok: "2.6445\n"},
 		{script: "print 1.23/2", ok: "0.615\n"},
 		{script: "print 2.23%2", ok: "0.23\n"},
+		//{script: "print 1.23/0", rc: 1, ok: "Runtime error: division by zero\n"}, //TODO:division by zero
 
 		//BOOL EXPRESSION
 		{script: "print 1==1", ok: "1\n"},
@@ -82,6 +84,7 @@ func TestCalc(t *testing.T) {
 		//ASSIGNMENT
 		{script: "i=1;print i", ok: "1\n"},
 		{script: "i=1;i=2.3;print i", ok: "2.3\n"},
+		{script: "i=1;i=2.3;i=1;print i", ok: "1\n"},
 		{script: "i=1.2;print i", ok: "1.2\n"},
 		{script: "i=1;j=2;print i*10+j", ok: "12\n"},
 		{script: "i=1>0;print i", ok: "1\n"},
