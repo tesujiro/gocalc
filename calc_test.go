@@ -20,6 +20,11 @@ type test struct {
 
 func TestCalc(t *testing.T) {
 	tests := []test{
+		//STATEMENT
+		{script: "1", ok: ""},
+		{script: "1\n2", ok: ""},
+		{script: "xxx", rc: 1, ok: "Compile error: unknown symbol\n"},
+		{script: "((", rc: 1, ok: "syntax error\n"},
 		//BASIC EXPRESSION
 		{script: "print 1", ok: "1\n"},
 		{script: "print 0", ok: "0\n"},

@@ -47,7 +47,7 @@ func runScript(source string) int {
 	env := vm.NewEnv()
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
-		fmt.Printf("Syntax error: %v \n", parseError)
+		fmt.Printf("%v\n", parseError)
 		return 1
 	}
 	/*
