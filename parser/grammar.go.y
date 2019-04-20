@@ -21,6 +21,7 @@
 %type	<stmts>		opt_stmts
 %type	<expr>		expr
 %type	<expr>		opt_expr
+%type	<expr>		variable
 
 %token	<token>		NUMBER STRING IDENT
 %token	<token>		PRINT PRINTF
@@ -34,7 +35,7 @@
 %token	<token>	LEN 
 */
 
-%right '='
+%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %left OROR
 %left ANDAND
 %left IDENT
@@ -131,50 +132,50 @@ stmt_if
 	}
 
 expr
-	: IDENT
+	: variable
 	{
-		$$ = &ast.IdentExpr{Literal: $1.Literal}
+		$$ = $1
 	}
 	| IDENT '=' expr
 	{
 		$$ = &ast.AssExpr{Left: $1.Literal, Right: $3}
 	}
 	/* COMPOSITE EXPRESSION */
-	| IDENT PLUSEQ expr
+	| variable PLUSEQ expr
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "+=", Right: $3}
+		$$ = &ast.CompExpr{Left: $1, Operator: "+=", Right: $3}
 	}
-	| IDENT MINUSEQ expr
+	| variable MINUSEQ expr
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "-=", Right: $3}
+		$$ = &ast.CompExpr{Left: $1, Operator: "-=", Right: $3}
 	}
-	| IDENT MULEQ expr
+	| variable MULEQ expr
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "*=", Right: $3}
+		$$ = &ast.CompExpr{Left: $1, Operator: "*=", Right: $3}
 	}
-	| IDENT DIVEQ expr
+	| variable DIVEQ expr
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "/=", Right: $3}
+		$$ = &ast.CompExpr{Left: $1, Operator: "/=", Right: $3}
 	}
-	| IDENT MODEQ expr
+	| variable MODEQ expr
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "%=", Right: $3}
+		$$ = &ast.CompExpr{Left: $1, Operator: "%=", Right: $3}
 	}
-	| IDENT PLUSPLUS
+	| variable PLUSPLUS
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "++"}
+		$$ = &ast.CompExpr{Left: $1, Operator: "++"}
 	}
-	| IDENT MINUSMINUS
+	| variable MINUSMINUS
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $1.Literal}, Operator: "--"}
+		$$ = &ast.CompExpr{Left: $1, Operator: "--"}
 	}
-	| PLUSPLUS IDENT
+	| PLUSPLUS variable
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $2.Literal}, Operator: "++"}
+		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
 	}
-	| MINUSMINUS IDENT
+	| MINUSMINUS variable
 	{
-		$$ = &ast.CompExpr{Left:  &ast.IdentExpr{Literal: $2.Literal}, Operator: "--"}
+		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
 	}
 	| NUMBER
 	{
@@ -252,7 +253,6 @@ expr
 		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
 	}
 
-
 opt_expr
 	:
 	{
@@ -261,6 +261,12 @@ opt_expr
 	| expr
 	{
 		$$ = $1
+	}
+
+variable
+	: IDENT
+	{
+		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
 
 opt_term
