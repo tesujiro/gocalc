@@ -125,6 +125,15 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		*/
 		l_type, r_type := l_register.Type(), r_register.Type()
 		arithmetic_type := precedenceOfTypes(l_type, r_type)
+		compare := func(ipred enum.IPred, fpred enum.FPred) value.Value {
+			if arithmetic_type != types.Double {
+				return env.Block().NewICmp(ipred, l_register, r_register)
+			} else {
+				l := toDouble(env, l_register)
+				r := toDouble(env, r_register)
+				return env.Block().NewFCmp(fpred, l, r)
+			}
+		}
 
 		var result value.Value
 		switch expr.(*ast.BinOpExpr).Operator {
@@ -190,26 +199,21 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 				result = env.Block().NewFRem(l, r)
 			}
 		case "<":
-			//TODO: FCmp if float
-			result = env.Block().NewICmp(enum.IPredSLT, l_register, r_register)
+			result = compare(enum.IPredSLT, enum.FPredOLT)
 		case ">":
-			result = env.Block().NewICmp(enum.IPredSGT, l_register, r_register)
+			result = compare(enum.IPredSGT, enum.FPredOGT)
 		case "<=":
-			result = env.Block().NewICmp(enum.IPredSLE, l_register, r_register)
+			result = compare(enum.IPredSLE, enum.FPredOLE)
 		case ">=":
-			result = env.Block().NewICmp(enum.IPredSGE, l_register, r_register)
+			result = compare(enum.IPredSGE, enum.FPredOGE)
 		case "==":
-			result = env.Block().NewICmp(enum.IPredEQ, l_register, r_register)
+			result = compare(enum.IPredEQ, enum.FPredOEQ)
 		case "!=":
-			result = env.Block().NewICmp(enum.IPredNE, l_register, r_register)
+			result = compare(enum.IPredNE, enum.FPredONE)
 		case "&&":
 			result = env.Block().NewAnd(l_register, r_register)
 		case "||":
 			result = env.Block().NewOr(l_register, r_register)
-		/*
-			case "/":
-					num.Quo(lnum, rnum)
-		*/
 		default:
 			return nil, fmt.Errorf("invalid binary operation: %v %v %v", left, expr.(*ast.BinOpExpr).Operator, right)
 		}

@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"github.com/tesujiro/gocalc/parser"
 	"github.com/tesujiro/gocalc/vm"
@@ -20,6 +22,19 @@ func main() {
 }
 
 func _main() int {
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("recover:", err)
+			for depth := 0; ; depth++ {
+				_, file, line, ok := runtime.Caller(depth)
+				if !ok {
+					break
+				}
+				log.Printf("=>%d: %v:%d", depth, file, line)
+			}
+		}
+	}()
 
 	//parser.TraceLexer()
 	flag.Parse()
