@@ -65,12 +65,9 @@ func runScript(source string) int {
 		fmt.Printf("%v\n", parseError)
 		return 1
 	}
-	/*
-		//TODO: DUMP AST
-		if *print_ast {
-			fmt.Printf("%#v\n", ast)
-		}
-	*/
+	if *print_ast {
+		parser.Dump(ast)
+	}
 	err := vm.Run(ast, env)
 	if err != nil {
 		fmt.Printf("Compile error: %v \n", err)
