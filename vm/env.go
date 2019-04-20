@@ -23,6 +23,8 @@ type Env struct {
 var ErrUnknownSymbol = errors.New("unknown symbol")
 var AlreadyKnownSymbol = errors.New("already known symbol")
 
+//var ErrDivisionByZero = errors.New("division by zero") //TODO
+
 func NewEnv() *Env {
 	module := ir.NewModule()
 	m := module.NewFunc("main", types.I32)
@@ -40,10 +42,8 @@ func NewEnv() *Env {
 	defs[".print_int"] = module.NewGlobalDef(".print_int", constant.NewCharArrayFromString("%d\n\x00"))
 	defs[".print_float"] = module.NewGlobalDef(".print_float", constant.NewCharArrayFromString("%g\n\x00"))
 	defs[".result"] = module.NewGlobalDef(".result", constant.NewCharArrayFromString("Result : %d\n\x00"))
-
-	// add error block
-	//errBlock := m.NewBlock("error")
-	//_ = errBlock
+	defs[".error"] = module.NewGlobalDef(".error", constant.NewCharArrayFromString("Runtime error : %s\n\x00"))
+	defs[".error_division_by_zero"] = module.NewGlobalDef(".error_division_by_zero", constant.NewCharArrayFromString("division by zero\x00"))
 
 	return &Env{
 		env:    make(map[string]value.Value),
@@ -132,17 +132,35 @@ func (e *Env) Generate() string {
 //TODO: GetNewFunc
 //TODO: SetCurrentFunc
 
-var label_number = 0
+var label_number = 0 //TODO move global variable to env struct member
+
+func (e *Env) newLabel(id string) string {
+	label_number++
+	return fmt.Sprintf("%d:%s", label_number, id)
+}
 
 func (e *Env) GetNewBlock(id string) *ir.Block {
-	label_number++
-	label := fmt.Sprintf("%d:%s", label_number, id)
 	// LLIR: ; <label>:(id)xx
-	block := e.funcScope().fnc.NewBlock(label)
+	block := e.funcScope().fnc.NewBlock(e.newLabel(id))
 	return block
 }
 
 func (e *Env) SetCurrentBlock(b *ir.Block) {
 	//fmt.Printf("SetCurrentBlock: %#v\n", b)
 	e.funcScope().block = b
+}
+
+func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
+	// LLIR: ; <label>:(id)xx
+	block := e.funcScope().fnc.NewBlock(e.newLabel("error"))
+
+	// LLIR: %8 = call i32 (i8*, ...) @printf(i8* getelementptr ([12 x i8], [12 x i8]* @.str.result, i32 0, i32 0), i32 %7)
+	zero := constant.NewInt(types.I32, 0)
+	msg := constant.NewGetElementPtr(e.defs[msg_key], zero, zero)
+	block.NewCall(e.lib["printf"], constant.NewGetElementPtr(e.defs[".error"], zero, zero), msg)
+
+	// EXIT 1
+	block.NewRet(constant.NewInt(types.I32, 1))
+
+	return block
 }

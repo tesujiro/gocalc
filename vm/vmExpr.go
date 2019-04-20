@@ -159,13 +159,20 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 				result = env.Block().NewFMul(l, r)
 			}
 		case "/":
+			nextBlock := env.GetNewBlock("next")
+			errBlock := env.GetNewErrorBlock(".error_division_by_zero")
 			if arithmetic_type != types.Double {
+				cmp := env.Block().NewICmp(enum.IPredEQ, r_register, constant.NewInt(types.I32, 0))
+				env.Block().NewCondBr(cmp, errBlock, nextBlock)
+				env.SetCurrentBlock(nextBlock)
 				// LLIR: %r= sdiv i32 %l, %r
 				result = env.Block().NewSDiv(l_register, r_register)
 			} else {
 				l := toDouble(env, l_register)
 				r := toDouble(env, r_register)
-				//TODO: if r is zero "division by zero"
+				cmp := env.Block().NewFCmp(enum.FPredOEQ, r, constant.NewFloat(types.Double, 0))
+				env.Block().NewCondBr(cmp, errBlock, nextBlock)
+				env.SetCurrentBlock(nextBlock)
 
 				// LLIR: %r= fdiv double %l, %r
 				result = env.Block().NewFDiv(l, r)
@@ -183,6 +190,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 				result = env.Block().NewFRem(l, r)
 			}
 		case "<":
+			//TODO: FCmp if float
 			result = env.Block().NewICmp(enum.IPredSLT, l_register, r_register)
 		case ">":
 			result = env.Block().NewICmp(enum.IPredSGT, l_register, r_register)

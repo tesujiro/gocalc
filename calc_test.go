@@ -56,7 +56,8 @@ func TestCalc(t *testing.T) {
 		{script: "print 1.23*2.15", ok: "2.6445\n"},
 		{script: "print 1.23/2", ok: "0.615\n"},
 		{script: "print 2.23%2", ok: "0.23\n"},
-		//{script: "print 1.23/0", rc: 1, ok: "Runtime error: division by zero\n"}, //TODO:division by zero
+		{script: "print 1/0", rc: 1, ok: "Runtime error : division by zero\n"},
+		{script: "print 1.23/0", rc: 1, ok: "Runtime error : division by zero\n"},
 
 		//BOOL EXPRESSION
 		{script: "print 1==1", ok: "1\n"},
