@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -91,19 +92,33 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 
 	case *ast.AssExpr:
 		assExpr := expr.(*ast.AssExpr)
-		key, exp := assExpr.Left, assExpr.Right
-		var val value.Value
+		left, right := assExpr.Left, assExpr.Right
+
+		// evaluate right expressions
+		right_values := make([]value.Value, len(right))
 		var err error
-		if val, err = evalExpr(exp, env); err != nil {
-			return nil, err
+		for i, expr := range right {
+			right_values[i], err = evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		_, err = evalAssExpr(key, val, env)
-		if err != nil {
-			return nil, err
+		// evaluate assExpr
+		switch {
+		case len(left) == 1 && len(right) == 1:
+			return evalAssExpr(left[0], right_values[0], env)
+		default:
+			for i, expr := range left {
+				if i >= len(right_values) {
+					return right_values[len(right_values)-1], nil
+				}
+				if _, err := evalAssExpr(expr, right_values[i], env); err != nil {
+					return nil, err
+				}
+			}
+			return right_values[len(left)-1], nil
 		}
-		return val, nil
-
 	case *ast.BinOpExpr:
 		var left, right value.Value
 		var err error
@@ -245,7 +260,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			return nil, err
 		}
 
-		after_val, err := evalAssExpr(left.(*ast.IdentExpr).Literal, result, env)
+		after_val, err := evalAssExpr(left, result, env)
 		if err != nil {
 			return nil, err
 		}
@@ -259,23 +274,29 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 	}
 }
 
-func evalAssExpr(key string, val value.Value, env *Env) (value.Value, error) {
-	stored_value, err := env.GetVar(key)
-	if err == ErrUnknownSymbol || !val.Type().Equal(stored_value.Type()) {
-		// LLIR: %x = alloca i32
-		tmp := env.Block().NewAlloca(val.Type())
-		// LLIR: store i32 <u>, i32* %x
-		env.Block().NewStore(val, tmp)
-	} else if err != nil {
-		return nil, err
-	} else {
-		// LLIR: %x = load i32, i32* %y
-		v_value := env.Block().NewLoad(val)
-		// LLIR: store i32 <u>, i32* %x
-		env.Block().NewStore(v_value, stored_value)
+func evalAssExpr(lexp ast.Expr, val value.Value, env *Env) (value.Value, error) {
+	switch lexp.(type) {
+	case *ast.IdentExpr:
+		key := lexp.(*ast.IdentExpr).Literal
+		stored_value, err := env.GetVar(key)
+		if err == ErrUnknownSymbol || !val.Type().Equal(stored_value.Type()) {
+			// LLIR: %x = alloca i32
+			tmp := env.Block().NewAlloca(val.Type())
+			// LLIR: store i32 <u>, i32* %x
+			env.Block().NewStore(val, tmp)
+		} else if err != nil {
+			return nil, err
+		} else {
+			// LLIR: %x = load i32, i32* %y
+			v_value := env.Block().NewLoad(val)
+			// LLIR: store i32 <u>, i32* %x
+			env.Block().NewStore(v_value, stored_value)
+		}
+		if err := env.SetVar(key, val); err != nil {
+			return nil, err
+		}
+		return val, nil
+	default:
+		return nil, errors.New("invalid operation")
 	}
-	if err := env.SetVar(key, val); err != nil {
-		return nil, err
-	}
-	return val, nil
 }

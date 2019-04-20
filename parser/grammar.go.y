@@ -9,8 +9,9 @@
 %union{
 	token	ast.Token
 	expr	ast.Expr
-	stmts	[]ast.Stmt
+	exprs	[]ast.Expr
 	stmt	ast.Stmt
+	stmts	[]ast.Stmt
 }
 
 %type	<stmts>		program
@@ -22,6 +23,9 @@
 %type	<expr>		expr
 %type	<expr>		opt_expr
 %type	<expr>		variable
+%type	<expr>		multi_val_assign
+%type	<exprs>		exprs
+%type	<exprs>		variables
 
 %token	<token>		NUMBER STRING IDENT
 %token	<token>		PRINT PRINTF
@@ -38,7 +42,8 @@
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %left OROR
 %left ANDAND
-%left IDENT
+/*%left IDENT*/
+%nonassoc ',' vars
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
@@ -87,6 +92,10 @@ stmt
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
 	}
+	| multi_val_assign
+	{
+		$$ = &ast.ExprStmt{Expr: $1}
+	}
 	| PRINT expr
 	{
 		$$ = &ast.PrintStmt{Expr: $2}
@@ -131,15 +140,33 @@ stmt_if
 		}
 	}
 
+multi_val_assign
+	: variables '=' exprs
+	{
+		$$ = &ast.AssExpr{Left: $1, Right: $3}
+	}
+
+exprs
+	: expr
+	{
+		$$ = []ast.Expr{$1}
+	}
+	| exprs ',' opt_term expr
+	{
+		$$ = append($1,$4)
+	}
+
 expr
 	: variable
 	{
 		$$ = $1
 	}
-	| IDENT '=' expr
+	/*
+	| variable '=' expr
 	{
-		$$ = &ast.AssExpr{Left: $1.Literal, Right: $3}
+		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
+	*/
 	/* COMPOSITE EXPRESSION */
 	| variable PLUSEQ expr
 	{
@@ -261,6 +288,16 @@ opt_expr
 	| expr
 	{
 		$$ = $1
+	}
+
+variables
+	: variable
+	{
+		$$ = []ast.Expr{$1}
+	}
+	| variables ',' opt_term variable
+	{
+		$$ = append($1,$4)
 	}
 
 variable

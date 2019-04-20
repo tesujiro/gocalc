@@ -7,8 +7,8 @@ type IdentExpr struct {
 }
 
 type AssExpr struct {
-	Left  string
-	Right Expr
+	Left  []Expr
+	Right []Expr
 }
 type NumExpr struct {
 	Literal string
