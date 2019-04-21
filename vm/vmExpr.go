@@ -76,6 +76,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		case "-":
 			// LLIR: %r= sub i32 0, %r
 			result = env.Block().NewSub(constant.NewInt(types.I32, 0), r)
+			// TODO double
 		case "!":
 			// LLIR: %r= fneg %r
 			result = env.Block().NewICmp(enum.IPredEQ, constant.NewInt(types.I1, 0), r)

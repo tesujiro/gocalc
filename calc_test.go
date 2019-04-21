@@ -100,6 +100,9 @@ func TestCalc(t *testing.T) {
 		{script: "i=1;j=2;print i*10+j", ok: "12\n"},
 		{script: "i=1>0;print i", ok: "1\n"},
 		{script: "print j", ok: "Compile error: unknown symbol\n", rc: 1},
+		{script: "i,j=1,2;print i;print j", ok: "1\n2\n"},
+		{script: "i,j=1,2,3;print i;print j", ok: "1\n2\n"},
+		{script: "i,j=1;print i", ok: "1\n"},
 
 		//COMPOSITE EXPRESSION
 		{script: "i=1;++i;print i", ok: "2\n"},
