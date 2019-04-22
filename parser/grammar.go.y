@@ -33,6 +33,7 @@
 %token	<token>		EQEQ NEQ GE LE ANDAND OROR
 %token	<token>		IF ELSE
 %token	<token>		FOR BREAK CONTINUE
+%token	<token>		RETURN EXIT
 %token	<token>		PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 /*
 %token	<token>	STRING TRUE FALSE NIL
@@ -107,6 +108,14 @@ stmt
 	| FOR opt_stmt ';' opt_expr ';' opt_expr '{' opt_stmts '}'
 	{
 		$$ = &ast.CForLoopStmt{Stmt1: $2, Expr2: $4, Expr3: $6, Stmts: $8}
+	}
+	| BREAK
+	{
+		$$ = &ast.BreakStmt{}
+	}
+	| CONTINUE
+	{
+		$$ = &ast.ContinueStmt{}
 	}
 
 opt_stmt

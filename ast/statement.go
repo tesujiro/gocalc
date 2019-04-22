@@ -2,6 +2,14 @@ package ast
 
 type Stmt interface{}
 
+type ReturnStmt struct {
+	Exprs []Expr
+}
+
+type ExitStmt struct {
+	Expr Expr
+}
+
 type ExprStmt struct {
 	Expr Expr
 }
@@ -22,4 +30,10 @@ type CForLoopStmt struct {
 	Expr2 Expr
 	Expr3 Expr
 	Stmts []Stmt
+}
+
+type BreakStmt struct {
+}
+
+type ContinueStmt struct {
 }

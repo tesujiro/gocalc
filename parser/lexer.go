@@ -49,6 +49,8 @@ var opName = map[string]int{
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,
+	"return":   RETURN,
+	"exit":     EXIT,
 	/*
 		"BEGIN":    BEGIN,
 		"END":      END,
@@ -61,8 +63,6 @@ var opName = map[string]int{
 		"nil":      NIL,
 		"function": FUNC,
 		"func":     FUNC,
-		"return":   RETURN,
-		"exit":     EXIT,
 		"while":    WHILE,
 		"do":       DO,
 	*/

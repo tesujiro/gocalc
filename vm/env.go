@@ -11,13 +11,15 @@ import (
 )
 
 type Env struct {
-	env    map[string]value.Value
-	lib    map[string]*ir.Func
-	defs   map[string]*ir.Global
-	parent *Env
-	module *ir.Module
-	fnc    *ir.Func
-	block  *ir.Block
+	env      map[string]value.Value
+	lib      map[string]*ir.Func
+	defs     map[string]*ir.Global
+	parent   *Env
+	module   *ir.Module
+	fnc      *ir.Func
+	block    *ir.Block
+	cntBlock *ir.Block
+	brkBlock *ir.Block
 }
 
 var ErrUnknownSymbol = errors.New("unknown symbol")
@@ -163,4 +165,32 @@ func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
 	block.NewRet(constant.NewInt(types.I32, 1))
 
 	return block
+}
+
+func (e *Env) SetContinueBlock(b *ir.Block) {
+	e.funcScope().cntBlock = b
+}
+
+func (e *Env) GetContinueBlock() *ir.Block {
+	if e.funcScope().cntBlock != nil {
+		return e.funcScope().cntBlock
+	}
+	if e.parent == nil {
+		return nil
+	}
+	return e.parent.GetContinueBlock()
+}
+
+func (e *Env) SetBreakBlock(b *ir.Block) {
+	e.funcScope().brkBlock = b
+}
+
+func (e *Env) GetBreakBlock() *ir.Block {
+	if e.funcScope().brkBlock != nil {
+		return e.funcScope().brkBlock
+	}
+	if e.parent == nil {
+		return nil
+	}
+	return e.parent.GetBreakBlock()
 }

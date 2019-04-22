@@ -55,7 +55,9 @@ func Run(stmts []ast.Stmt, env *Env) error {
 func run(stmts []ast.Stmt, env *Env) (result value.Value, err error) {
 	for _, stmt := range stmts {
 		result, err = runSingleStmt(stmt, env)
-		if err != nil {
+
+		//fmt.Printf("run err:%v\n", err)
+		if err != nil && err != ErrBreak && err != ErrContinue {
 			return
 		}
 	}
@@ -86,17 +88,34 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		// then
 		child.SetCurrentBlock(thenBlock)
 		r, err := run(ifStmt.Then, child)
-		if err != nil {
+
+		//TODO: REFACT
+		if err == ErrBreak {
+			block := env.GetBreakBlock()
+			if block == nil {
+				return nil, fmt.Errorf("break not inside loop")
+			}
+			env.Block().NewBr(block)
+		} else if err == ErrContinue {
+			block := env.GetContinueBlock()
+			if block == nil {
+				return nil, fmt.Errorf("continue not inside loop")
+			}
+			env.Block().NewBr(block)
+		} else if err != nil {
+			//fmt.Printf("Then err:%v\n", err)
 			return nil, err
+		} else {
+			child.Block().NewBr(nextBlock)
 		}
 		result = r
-		child.Block().NewBr(nextBlock)
 
 		// else
 		child.SetCurrentBlock(elseBlock)
 		if len(stmt.(*ast.IfStmt).Else) > 0 {
 			r, err := run(ifStmt.Else, child)
-			if err != nil {
+			//if err != nil {
+			if err != nil && err != ErrBreak && err != ErrContinue {
 				return nil, err
 			}
 			result = r
@@ -116,7 +135,10 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		child := env.NewEnv()
 		condBlock := child.GetNewBlock("cond")
 		loopBlock := child.GetNewBlock("loop")
+		postBlock := child.GetNewBlock("post")
 		nextBlock := child.GetNewBlock("next")
+		child.SetContinueBlock(postBlock)
+		child.SetBreakBlock(nextBlock)
 
 		// init
 		if stmt1 != nil {
@@ -146,8 +168,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		if err != nil {
 			return nil, fmt.Errorf("for loop stmts error: %v", err)
 		}
+		child.Block().NewBr(postBlock)
 		result = ret
 
+		// post statement
+		child.SetCurrentBlock(postBlock)
 		if expr3 != nil {
 			_, err := evalExpr(expr3, child)
 			if err != nil {
@@ -158,7 +183,15 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 
 		// next
 		child.SetCurrentBlock(nextBlock)
+		child.SetContinueBlock(nil)
+		child.SetBreakBlock(nil)
 		return result, nil
+
+	case *ast.ContinueStmt:
+		return nil, ErrContinue
+
+	case *ast.BreakStmt:
+		return nil, ErrBreak
 
 	case *ast.PrintStmt:
 		v, err := evalExpr(stmt.(*ast.PrintStmt).Expr, env)

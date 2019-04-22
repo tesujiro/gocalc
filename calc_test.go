@@ -135,6 +135,8 @@ func TestCalc(t *testing.T) {
 		//FOR STMT
 		{script: "for i=1;i<5;i++{print i}", ok: "1\n2\n3\n4\n"},
 		{script: "for i=1;i<5;i++{for j=1;j<3;j++{print i}}", ok: "1\n1\n2\n2\n3\n3\n4\n4\n"},
+		{script: "for i=1;i<5;i++{print i;if i==2 {break}}", ok: "1\n2\n"},
+		{script: "for i=1;i<5;i++{if i<=2 {continue};print i}", ok: "3\n4\n"},
 	}
 
 	//realStdin := os.Stdin
