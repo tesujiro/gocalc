@@ -88,25 +88,10 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		// then
 		child.SetCurrentBlock(thenBlock)
 		r, err := run(ifStmt.Then, child)
-
-		//TODO: REFACT
-		if err == ErrBreak {
-			block := env.GetBreakBlock()
-			if block == nil {
-				return nil, fmt.Errorf("break not inside loop")
-			}
-			env.Block().NewBr(block)
-		} else if err == ErrContinue {
-			block := env.GetContinueBlock()
-			if block == nil {
-				return nil, fmt.Errorf("continue not inside loop")
-			}
-			env.Block().NewBr(block)
-		} else if err != nil {
-			//fmt.Printf("Then err:%v\n", err)
-			return nil, err
-		} else {
+		if err == nil {
 			child.Block().NewBr(nextBlock)
+		} else if err != nil && err != ErrBreak && err != ErrContinue {
+			return nil, err
 		}
 		result = r
 
@@ -114,13 +99,15 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		child.SetCurrentBlock(elseBlock)
 		if len(stmt.(*ast.IfStmt).Else) > 0 {
 			r, err := run(ifStmt.Else, child)
-			//if err != nil {
-			if err != nil && err != ErrBreak && err != ErrContinue {
+			if err == nil {
+				child.Block().NewBr(nextBlock)
+			} else if err != nil && err != ErrBreak && err != ErrContinue {
 				return nil, err
 			}
 			result = r
+		} else {
+			child.Block().NewBr(nextBlock)
 		}
-		child.Block().NewBr(nextBlock)
 
 		// next
 		child.SetCurrentBlock(nextBlock)
@@ -165,10 +152,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		// loop
 		child.SetCurrentBlock(loopBlock)
 		ret, err := run(stmts, child)
-		if err != nil {
+		if err == nil {
+			child.Block().NewBr(postBlock)
+		} else if err != nil && err != ErrBreak && err != ErrContinue {
 			return nil, fmt.Errorf("for loop stmts error: %v", err)
 		}
-		child.Block().NewBr(postBlock)
 		result = ret
 
 		// post statement
@@ -188,9 +176,19 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		return result, nil
 
 	case *ast.ContinueStmt:
+		block := env.GetContinueBlock()
+		if block == nil {
+			return nil, fmt.Errorf("continue not inside loop")
+		}
+		env.Block().NewBr(block)
 		return nil, ErrContinue
 
 	case *ast.BreakStmt:
+		block := env.GetBreakBlock()
+		if block == nil {
+			return nil, fmt.Errorf("break not inside loop")
+		}
+		env.Block().NewBr(block)
 		return nil, ErrBreak
 
 	case *ast.PrintStmt:
