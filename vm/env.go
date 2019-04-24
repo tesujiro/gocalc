@@ -11,13 +11,14 @@ import (
 )
 
 type Env struct {
-	env      map[string]value.Value
-	lib      map[string]*ir.Func
-	defs     map[string]*ir.Global
-	parent   *Env
-	module   *ir.Module
-	fnc      *ir.Func
-	block    *ir.Block
+	env    map[string]value.Value
+	lib    map[string]*ir.Func
+	defs   map[string]*ir.Global
+	parent *Env
+	module *ir.Module
+	fnc    *ir.Func
+	//block    *ir.Block
+	block    *MyBlock
 	cntBlock *ir.Block
 	brkBlock *ir.Block
 }
@@ -30,7 +31,8 @@ var AlreadyKnownSymbol = errors.New("already known symbol")
 func NewEnv() *Env {
 	module := ir.NewModule()
 	m := module.NewFunc("main", types.I32)
-	entry := m.NewBlock("entry")
+	//entry := m.NewBlock("entry")
+	entry := &MyBlock{m.NewBlock("entry"), false}
 	lib := make(map[string]*ir.Func)
 	defs := make(map[string]*ir.Global)
 
@@ -120,7 +122,29 @@ func (e *Env) Func() *ir.Func {
 	return e.parent.Func()
 }
 
-func (e *Env) Block() *ir.Block {
+type MyBlock struct {
+	*ir.Block
+	branched bool
+}
+
+func (mb *MyBlock) NewBr(target *ir.Block) *ir.TermBr {
+	if mb.branched {
+		panic("ALREADY BRANCHED")
+	}
+	mb.branched = true
+	return mb.Block.NewBr(target)
+}
+
+func (mb *MyBlock) NewCondBr(cond value.Value, targetTrue, targetFalse *ir.Block) *ir.TermCondBr {
+	if mb.branched {
+		panic("ALREADY BRANCHED")
+	}
+	mb.branched = true
+	return mb.Block.NewCondBr(cond, targetTrue, targetFalse)
+}
+
+//func (e *Env) Block() *ir.Block {
+func (e *Env) Block() *MyBlock {
 	if e.block != nil || e.parent == nil {
 		return e.block
 	}
@@ -149,7 +173,12 @@ func (e *Env) GetNewBlock(id string) *ir.Block {
 
 func (e *Env) SetCurrentBlock(b *ir.Block) {
 	//fmt.Printf("SetCurrentBlock: %#v\n", b)
-	e.funcScope().block = b
+	//e.funcScope().block = b
+	//TODO: !e.Block().branched  --> error
+	if !e.Block().branched {
+		panic("No BRANCH")
+	}
+	e.funcScope().block = &MyBlock{b, false}
 }
 
 func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
