@@ -24,7 +24,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
 			f, err := strconv.ParseFloat(lit, 64)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("parse float err(%v):%v", lit, err)
 			}
 			num_type = types.Double // double float NOT types.Float
 			// LLIR: %x = alloca f32
@@ -37,7 +37,7 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			// integer
 			i64, err := strconv.ParseInt(lit, 10, 64)
 			if err != nil {
-				return nil, fmt.Errorf("convert number err(%v):%v", lit, err)
+				return nil, fmt.Errorf("parse int err(%v):%v", lit, err)
 			}
 			num_type = types.I32
 			// LLIR: %x = alloca i32
