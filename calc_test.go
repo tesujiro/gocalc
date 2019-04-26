@@ -26,6 +26,9 @@ func TestCalc(t *testing.T) {
 		{script: "1\n2", ok: ""},
 		{script: "xxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 		{script: "((", rc: 1, ok: "syntax error\n"},
+		//OPTIONS
+		//{script: "1", options: []string{"-a"}, ok: ""}, //TODO: needs refactoring flag.parse
+
 		//BASIC EXPRESSION
 		{script: "print 1", ok: "1\n"},
 		{script: "print 0", ok: "0\n"},
@@ -141,6 +144,7 @@ func TestCalc(t *testing.T) {
 		{script: "for i=1;i<5;i++{print i;continue}", ok: "1\n2\n3\n4\n"},
 		{script: "for i=1;i<5;i++{print i;if i==2 {break}else{continue}}", ok: "1\n2\n"},
 		{script: "for i=1;i<5;i++{print i;if i==2 {continue}else{break}}", ok: "1\n"},
+		{script: "for i=1;i<5;i++{if 1==1{ if i<=2 {continue};print i}}", ok: "3\n4\n"},
 		//{script: "for i=1;i<5;i++{for break;j<3;j++{print i}}", ok: "\n"}, //TODO??
 	}
 
@@ -188,6 +192,7 @@ func TestCalc(t *testing.T) {
 				os.Args = append(os.Args, test.script)
 			}
 			rc := _main()
+			//fmt.Fprintf(realStdout, "case:%d os.Args=%v *print_ast=%v\n", case_number, os.Args, *print_ast)
 			if rc != test.rc && !strings.Contains(test.ok, "error") {
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test.script)
 			}

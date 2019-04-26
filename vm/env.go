@@ -8,6 +8,7 @@ import (
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
+	"github.com/tesujiro/gocalc/debug"
 )
 
 type Env struct {
@@ -197,10 +198,12 @@ func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
 }
 
 func (e *Env) SetContinueBlock(b *ir.Block) {
+	debug.Println("SetContinueBlock")
 	e.funcScope().cntBlock = b
 }
 
 func (e *Env) GetContinueBlock() *ir.Block {
+	debug.Println("GetContinueBlock")
 	if e.funcScope().cntBlock != nil {
 		return e.funcScope().cntBlock
 	}

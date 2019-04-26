@@ -8,6 +8,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 	"github.com/tesujiro/gocalc/ast"
+	"github.com/tesujiro/gocalc/debug"
 )
 
 var (
@@ -19,7 +20,6 @@ var (
 )
 
 func Run(stmts []ast.Stmt, env *Env) error {
-	//return run(stmts, env)
 	result, err := run(stmts, env)
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func run(stmts []ast.Stmt, env *Env) (result value.Value, err error) {
 	for _, stmt := range stmts {
 		result, err = runSingleStmt(stmt, env)
 
-		//fmt.Printf("run err:%v\n", err)
+		debug.Printf("run err:%v\n", err)
 		if err != nil && err != ErrBreak && err != ErrContinue {
 			return
 		}
@@ -73,6 +73,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		var result value.Value
 		ifStmt := stmt.(*ast.IfStmt)
 		child := env.NewEnv()
+		debug.Println("NewEnv in IfStmt")
 		cond, err := evalExpr(ifStmt.If, child)
 		if err != nil {
 			return nil, err
@@ -82,7 +83,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		thenBlock := child.GetNewBlock("then")
 		elseBlock := child.GetNewBlock("else")
 		nextBlock := child.GetNewBlock("next")
-		cond_r := env.Block().NewLoad(cond)
+		cond_r := child.Block().NewLoad(cond)
 		child.Block().NewCondBr(cond_r, thenBlock, elseBlock)
 
 		// then
@@ -120,6 +121,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		expr3 := stmt.(*ast.CForLoopStmt).Expr3
 		stmts := stmt.(*ast.CForLoopStmt).Stmts
 		child := env.NewEnv()
+		debug.Println("NewEnv in CForLoopStmt")
 		condBlock := child.GetNewBlock("cond")
 		loopBlock := child.GetNewBlock("loop")
 		postBlock := child.GetNewBlock("post")

@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/tesujiro/gocalc/debug"
 	"github.com/tesujiro/gocalc/parser"
 	"github.com/tesujiro/gocalc/vm"
 )
@@ -16,6 +17,7 @@ import (
 var print_ast = flag.Bool("a", false, "print AST")
 var print_ir = flag.Bool("i", false, "print llvm ir")
 var no_exec = flag.Bool("n", false, "no execution")
+var dbg = flag.Bool("d", false, "debug option")
 
 func main() {
 	os.Exit(_main())
@@ -44,6 +46,12 @@ func _main() int {
 		fmt.Println("No expression error!")
 		fmt.Printf("ex: %v '(1+1)*3+10' ; echo $?\n", os.Args[0])
 		return 1
+	}
+
+	if *dbg {
+		debug.On()
+	} else {
+		debug.Off()
 	}
 
 	for _, source := range args {
