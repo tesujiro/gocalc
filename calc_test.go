@@ -106,6 +106,12 @@ func TestCalc(t *testing.T) {
 		{script: "i,j=1,2;print i;print j", ok: "1\n2\n"},
 		{script: "i,j=1,2,3;print i;print j", ok: "1\n2\n"},
 		{script: "i,j=1;print i", ok: "1\n"},
+		{script: "print i", ok: "Compile error: unknown symbol\n"},
+		{script: "print -i", ok: "Compile error: unknown symbol\n"},
+		{script: "i=-j", ok: "Compile error: unknown symbol\n"},
+		{script: "i,j=1,x;print i;print j", ok: "Compile error: unknown symbol\n"},
+		{script: "print i+1", ok: "Compile error: unknown symbol\n"},
+		{script: "print 1+i", ok: "Compile error: unknown symbol\n"},
 
 		//COMPOSITE EXPRESSION
 		{script: "i=1;++i;print i", ok: "2\n"},
@@ -123,6 +129,7 @@ func TestCalc(t *testing.T) {
 		{script: "i=1.1;i*=1.2;print i", ok: "1.32\n"},
 		{script: "i=17;i/=4;print i", ok: "4\n"},
 		{script: "i=17;i%=4;print i", ok: "1\n"},
+		{script: "i+=j", ok: "Compile error: unknown symbol\n"},
 
 		//IF STMT
 		{script: "if 1>0 {print 1};print 2", ok: "1\n2\n"},
@@ -134,6 +141,9 @@ func TestCalc(t *testing.T) {
 		{script: "i=0;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "3\n"},
 		{script: "i=1;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "2\n3\n"},
 		{script: "i=2;if i>0 {if i>1 {print 1}else{print 2}};print 3", ok: "1\n3\n"},
+		{script: "if i>0 {print 1}", ok: "Compile error: unknown symbol\n"},
+		{script: "if 1>0 {print i}", ok: "Compile error: unknown symbol\n"},
+		{script: "if 1>0 {}else{print j}", ok: "Compile error: unknown symbol\n"},
 
 		//FOR STMT
 		{script: "for i=1;i<5;i++{print i}", ok: "1\n2\n3\n4\n"},
@@ -142,12 +152,18 @@ func TestCalc(t *testing.T) {
 		{script: "for i=1;i<5;i++{if i<=2 {continue};print i}", ok: "3\n4\n"},
 		{script: "for i=1;i<5;i++{print i;break}", ok: "1\n"},
 		{script: "for i=1;i<5;i++{print i;continue}", ok: "1\n2\n3\n4\n"},
-		{script: "for i=1;i<5;i++{print i;if i==2 {break}else{continue}}", ok: "1\n2\n"},
+		{script: "for i=1;;i++{print i;if i==2 {break}else{continue}}", ok: "1\n2\n"},
 		{script: "for i=1;i<5;i++{print i;if i==2 {continue}else{break}}", ok: "1\n"},
 		{script: "for i=1;i<5;i++{if 1==1{ if i<=2 {continue};print i}}", ok: "3\n4\n"},
 		{script: "for i=1;i<5;i++{if i<4{ if i<=2 {continue};print i}else{break}}", ok: "3\n"},
 		{script: "for i=1;i<5;i++{for j=1;j<3;j++{break};print i;break}", ok: "1\n"},
 		//{script: "for i=1;i<5;i++{for break;j<3;j++{print i}}", ok: "\n"}, //TODO??
+		{script: "break", ok: "Compile error: break not inside loop\n"},
+		{script: "continue", ok: "Compile error: continue not inside loop\n"},
+		{script: "for break;i<5;i++{print i}", ok: "Compile error: for init stmt error: unexpected break\n"},
+		{script: "for i=1;j<5;i++{print i}", ok: "Compile error: for condition expr error: unknown symbol\n"},
+		{script: "for i=1;i<5;j++{print i}", ok: "Compile error: for final expr error: unknown symbol\n"},
+		{script: "for i=1;i<5;i++{print j}", ok: "Compile error: for loop stmts error: unknown symbol\n"},
 	}
 
 	//realStdin := os.Stdin
