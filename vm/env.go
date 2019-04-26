@@ -12,13 +12,13 @@ import (
 )
 
 type Env struct {
-	env    map[string]value.Value
-	lib    map[string]*ir.Func
-	defs   map[string]*ir.Global
-	parent *Env
-	module *ir.Module
-	fnc    *ir.Func
-	//block    *ir.Block
+	path     string
+	env      map[string]value.Value
+	lib      map[string]*ir.Func
+	defs     map[string]*ir.Global
+	parent   *Env
+	module   *ir.Module
+	fnc      *ir.Func
 	block    *MyBlock
 	cntBlock *ir.Block
 	brkBlock *ir.Block
@@ -30,8 +30,9 @@ var AlreadyKnownSymbol = errors.New("already known symbol")
 //var ErrDivisionByZero = errors.New("division by zero") //TODO
 
 func NewEnv() *Env {
+	func_name := "main"
 	module := ir.NewModule()
-	m := module.NewFunc("main", types.I32)
+	m := module.NewFunc(func_name, types.I32)
 	//entry := m.NewBlock("entry")
 	entry := &MyBlock{m.NewBlock("entry"), false}
 	lib := make(map[string]*ir.Func)
@@ -51,6 +52,7 @@ func NewEnv() *Env {
 	defs[".error_division_by_zero"] = module.NewGlobalDef(".error_division_by_zero", constant.NewCharArrayFromString("division by zero\x00"))
 
 	return &Env{
+		path:   "/" + func_name,
 		env:    make(map[string]value.Value),
 		lib:    lib,
 		defs:   defs,
@@ -61,8 +63,9 @@ func NewEnv() *Env {
 	}
 }
 
-func (e *Env) NewEnv() *Env {
+func (e *Env) NewEnv(stmt_name string) *Env {
 	return &Env{
+		path:   e.path + "/" + stmt_name,
 		env:    make(map[string]value.Value),
 		lib:    e.lib,
 		defs:   e.defs,
@@ -199,12 +202,12 @@ func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
 }
 
 func (e *Env) SetContinueBlock(b *ir.Block) {
-	debug.Printf("SetContinueBlock current block:%v\n", e.Block())
+	debug.Printf("%v:SetContinueBlock\n", e.blockScope().path)
 	e.blockScope().cntBlock = b
 }
 
 func (e *Env) GetContinueBlock() *ir.Block {
-	debug.Println("GetContinueBlock")
+	debug.Printf("%v:GetContinueBlock\n", e.path)
 	if e.blockScope().cntBlock != nil {
 		return e.blockScope().cntBlock
 	}
@@ -215,10 +218,12 @@ func (e *Env) GetContinueBlock() *ir.Block {
 }
 
 func (e *Env) SetBreakBlock(b *ir.Block) {
+	debug.Printf("%v:SetBreakBlock\n", e.blockScope().path)
 	e.blockScope().brkBlock = b
 }
 
 func (e *Env) GetBreakBlock() *ir.Block {
+	debug.Printf("%v:GetBreakBlock\n", e.path)
 	if e.blockScope().brkBlock != nil {
 		return e.blockScope().brkBlock
 	}

@@ -72,7 +72,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 	case *ast.IfStmt:
 		var result value.Value
 		ifStmt := stmt.(*ast.IfStmt)
-		child := env.NewEnv()
+		child := env.NewEnv("If")
 		debug.Println("NewEnv in IfStmt")
 		cond, err := evalExpr(ifStmt.If, child)
 		if err != nil {
@@ -120,7 +120,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		expr2 := stmt.(*ast.CForLoopStmt).Expr2
 		expr3 := stmt.(*ast.CForLoopStmt).Expr3
 		stmts := stmt.(*ast.CForLoopStmt).Stmts
-		child := env.NewEnv()
+		child := env.NewEnv("CForLoop")
 		debug.Println("NewEnv in CForLoopStmt")
 		condBlock := child.GetNewBlock("cond")
 		loopBlock := child.GetNewBlock("loop")
