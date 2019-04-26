@@ -105,10 +105,6 @@ func (e *Env) funcScope() *Env {
 	return e.parent.funcScope()
 }
 
-func (e *Env) blockScope() *Env {
-	return e
-}
-
 func (e *Env) Module() *ir.Module {
 	if e.module != nil || e.parent == nil {
 		return e.module
@@ -145,10 +141,7 @@ func (mb *MyBlock) NewCondBr(cond value.Value, targetTrue, targetFalse *ir.Block
 }
 
 func (e *Env) Block() *MyBlock {
-	if e.block != nil || e.parent == nil {
-		return e.block
-	}
-	return e.parent.Block()
+	return e.block
 }
 
 func (e *Env) Generate() string {
@@ -175,8 +168,8 @@ func (e *Env) SetCurrentBlock(b *ir.Block) {
 	if !e.Block().branched {
 		panic("No BRANCH")
 	}
-	debug.Printf("%v:SetCurrentBlock(%v->%v)\n", e.blockScope().path, e.blockScope().block, b)
-	*e.blockScope().block = MyBlock{b, false}
+	debug.Printf("%v:SetCurrentBlock(%v->%v)\n", e.path, e.block, b)
+	*e.block = MyBlock{b, false}
 }
 
 func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
@@ -195,14 +188,14 @@ func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
 }
 
 func (e *Env) SetContinueBlock(b *ir.Block) {
-	debug.Printf("%v:SetContinueBlock\n", e.blockScope().path)
-	e.blockScope().cntBlock = b
+	debug.Printf("%v:SetContinueBlock\n", e.path)
+	e.cntBlock = b
 }
 
 func (e *Env) GetContinueBlock() *ir.Block {
 	debug.Printf("%v:GetContinueBlock\n", e.path)
-	if e.blockScope().cntBlock != nil {
-		return e.blockScope().cntBlock
+	if e.cntBlock != nil {
+		return e.cntBlock
 	}
 	if e.parent == nil {
 		return nil
@@ -211,14 +204,14 @@ func (e *Env) GetContinueBlock() *ir.Block {
 }
 
 func (e *Env) SetBreakBlock(b *ir.Block) {
-	debug.Printf("%v:SetBreakBlock\n", e.blockScope().path)
-	e.blockScope().brkBlock = b
+	debug.Printf("%v:SetBreakBlock\n", e.path)
+	e.brkBlock = b
 }
 
 func (e *Env) GetBreakBlock() *ir.Block {
 	debug.Printf("%v:GetBreakBlock\n", e.path)
-	if e.blockScope().brkBlock != nil {
-		return e.blockScope().brkBlock
+	if e.brkBlock != nil {
+		return e.brkBlock
 	}
 	if e.parent == nil {
 		return nil
