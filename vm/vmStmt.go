@@ -136,11 +136,13 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 				return nil, fmt.Errorf("for init stmt error: %v", err)
 			}
 		}
+		debug.Printf("%v.NewBr(%v)\n", child.path, condBlock)
 		child.Block().NewBr(condBlock)
 
 		// loop Condition
 		child.SetCurrentBlock(condBlock)
 		if expr2 == nil {
+			debug.Printf("%v.NewBr(%v)\n", child.path, loopBlock)
 			child.Block().NewBr(loopBlock)
 		} else {
 			cond, err := evalExpr(expr2, child)
@@ -148,6 +150,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 				return nil, fmt.Errorf("for condition expr error: %v", err)
 			}
 			cond_r := env.Block().NewLoad(cond)
+			debug.Printf("%v.NewCondBr(%v,%v)\n", child.path, loopBlock, nextBlock)
 			child.Block().NewCondBr(cond_r, loopBlock, nextBlock)
 		}
 
@@ -155,6 +158,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		child.SetCurrentBlock(loopBlock)
 		ret, err := run(stmts, child)
 		if err == nil {
+			debug.Printf("%v.NewBr(%v)\n", child.path, postBlock)
 			child.Block().NewBr(postBlock)
 		} else if err != nil && err != ErrBreak && err != ErrContinue {
 			return nil, fmt.Errorf("for loop stmts error: %v", err)
@@ -169,6 +173,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 				return nil, fmt.Errorf("for final expr error: %v", err)
 			}
 		}
+		debug.Printf("%v.NewBr(%v)\n", child.path, condBlock)
 		child.Block().NewBr(condBlock)
 
 		// next

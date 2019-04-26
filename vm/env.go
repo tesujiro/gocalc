@@ -72,7 +72,7 @@ func (e *Env) NewEnv(stmt_name string) *Env {
 		parent: e,
 		module: nil,
 		fnc:    nil,
-		block:  nil,
+		block:  e.block,
 	}
 }
 
@@ -106,10 +106,7 @@ func (e *Env) funcScope() *Env {
 }
 
 func (e *Env) blockScope() *Env {
-	if e.block != nil || e.parent == nil {
-		return e
-	}
-	return e.parent.blockScope()
+	return e
 }
 
 func (e *Env) Module() *ir.Module {
@@ -147,7 +144,6 @@ func (mb *MyBlock) NewCondBr(cond value.Value, targetTrue, targetFalse *ir.Block
 	return mb.Block.NewCondBr(cond, targetTrue, targetFalse)
 }
 
-//func (e *Env) Block() *ir.Block {
 func (e *Env) Block() *MyBlock {
 	if e.block != nil || e.parent == nil {
 		return e.block
@@ -176,14 +172,11 @@ func (e *Env) GetNewBlock(id string) *ir.Block {
 }
 
 func (e *Env) SetCurrentBlock(b *ir.Block) {
-	//fmt.Printf("SetCurrentBlock: %#v\n", b)
-	//e.funcScope().block = b
-	//TODO: !e.Block().branched  --> error
 	if !e.Block().branched {
 		panic("No BRANCH")
 	}
-	//e.funcScope().block = &MyBlock{b, false}
-	e.blockScope().block = &MyBlock{b, false}
+	debug.Printf("%v:SetCurrentBlock(%v->%v)\n", e.blockScope().path, e.blockScope().block, b)
+	*e.blockScope().block = MyBlock{b, false}
 }
 
 func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
