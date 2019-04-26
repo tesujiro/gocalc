@@ -14,16 +14,17 @@ import (
 	"github.com/tesujiro/gocalc/vm"
 )
 
-var print_ast = flag.Bool("a", false, "print AST")
-var print_ir = flag.Bool("i", false, "print llvm ir")
-var no_exec = flag.Bool("n", false, "no execution")
-var dbg = flag.Bool("d", false, "debug option")
+var (
+	print_ast, print_ir, no_exec, dbg bool
+)
 
 func main() {
 	os.Exit(_main())
 }
 
 func _main() int {
+
+	//parser.TraceLexer()
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -38,9 +39,14 @@ func _main() int {
 		}
 	}()
 
-	//parser.TraceLexer()
-	flag.Parse()
-	args := flag.Args()
+	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	f.BoolVar(&print_ast, "a", false, "print AST")
+	f.BoolVar(&print_ir, "i", false, "print llvm ir")
+	f.BoolVar(&no_exec, "n", false, "no execution")
+	f.BoolVar(&dbg, "d", false, "debug option")
+
+	f.Parse(os.Args[1:])
+	args := f.Args()
 
 	if len(args) < 1 {
 		fmt.Println("No expression error!")
@@ -48,8 +54,9 @@ func _main() int {
 		return 1
 	}
 
-	if *dbg {
+	if dbg {
 		debug.On()
+		fmt.Println("debug option")
 	} else {
 		debug.Off()
 	}
@@ -73,7 +80,7 @@ func runScript(source string) int {
 		fmt.Printf("%v\n", parseError)
 		return 1
 	}
-	if *print_ast {
+	if print_ast {
 		parser.Dump(ast)
 	}
 	err := vm.Run(ast, env)
@@ -84,11 +91,11 @@ func runScript(source string) int {
 
 	src_lli := env.Generate()
 
-	if *print_ir {
+	if print_ir {
 		fmt.Println(src_lli)
 	}
 
-	if *no_exec {
+	if no_exec {
 		return 0
 	}
 

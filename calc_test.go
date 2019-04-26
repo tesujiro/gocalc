@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -12,10 +13,11 @@ import (
 const command_name = "calc"
 
 type test struct {
-	script  string
-	options []string
-	ok      string
-	rc      int
+	script   string
+	options  []string
+	ok       string
+	ok_regex string
+	rc       int
 }
 
 func TestCalc(t *testing.T) {
@@ -27,7 +29,10 @@ func TestCalc(t *testing.T) {
 		{script: "xxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 		{script: "((", rc: 1, ok: "syntax error\n"},
 		//OPTIONS
-		//{script: "1", options: []string{"-a"}, ok: ""}, //TODO: needs refactoring flag.parse
+		{script: "1", options: []string{"-a"}, ok_regex: `ast.NumExpr{Literal:"1"}`},
+		{script: "1", options: []string{"-i"}, ok_regex: `define i32 @main\(\) {`},
+		{script: "1", options: []string{"-d"}, ok_regex: `debug option`},
+		{script: "1", options: []string{"-n"}, ok: ""},
 
 		//BASIC EXPRESSION
 		{script: "print 1", ok: "1\n"},
@@ -238,6 +243,12 @@ func TestCalc(t *testing.T) {
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if test.ok != "" && resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
+		}
+		if test.ok_regex != "" {
+			r := regexp.MustCompile(test.ok_regex)
+			if !r.MatchString(resultOut) {
+				t.Errorf("Case:[%v] received: %v - expected(regexp): %v - runSource: %v", case_number, resultOut, test.ok_regex, test.script)
+			}
 		}
 
 		wg.Wait()
