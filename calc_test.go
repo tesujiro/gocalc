@@ -145,6 +145,8 @@ func TestCalc(t *testing.T) {
 		{script: "for i=1;i<5;i++{print i;if i==2 {break}else{continue}}", ok: "1\n2\n"},
 		{script: "for i=1;i<5;i++{print i;if i==2 {continue}else{break}}", ok: "1\n"},
 		{script: "for i=1;i<5;i++{if 1==1{ if i<=2 {continue};print i}}", ok: "3\n4\n"},
+		{script: "for i=1;i<5;i++{if i<4{ if i<=2 {continue};print i}else{break}}", ok: "3\n"},
+		{script: "for i=1;i<5;i++{for j=1;j<3;j++{break};print i;break}", ok: "1\n"},
 		//{script: "for i=1;i<5;i++{for break;j<3;j++{print i}}", ok: "\n"}, //TODO??
 	}
 

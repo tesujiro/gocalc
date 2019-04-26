@@ -56,7 +56,7 @@ func run(stmts []ast.Stmt, env *Env) (result value.Value, err error) {
 	for _, stmt := range stmts {
 		result, err = runSingleStmt(stmt, env)
 
-		debug.Printf("run err:%v\n", err)
+		//debug.Printf("run err:%v\n", err)
 		if err != nil && err != ErrBreak && err != ErrContinue {
 			return
 		}

@@ -179,7 +179,8 @@ func (e *Env) SetCurrentBlock(b *ir.Block) {
 	if !e.Block().branched {
 		panic("No BRANCH")
 	}
-	e.funcScope().block = &MyBlock{b, false}
+	//e.funcScope().block = &MyBlock{b, false}
+	e.blockScope().block = &MyBlock{b, false}
 }
 
 func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
@@ -198,14 +199,14 @@ func (e *Env) GetNewErrorBlock(msg_key string) *ir.Block {
 }
 
 func (e *Env) SetContinueBlock(b *ir.Block) {
-	debug.Println("SetContinueBlock")
-	e.funcScope().cntBlock = b
+	debug.Printf("SetContinueBlock current block:%v\n", e.Block())
+	e.blockScope().cntBlock = b
 }
 
 func (e *Env) GetContinueBlock() *ir.Block {
 	debug.Println("GetContinueBlock")
-	if e.funcScope().cntBlock != nil {
-		return e.funcScope().cntBlock
+	if e.blockScope().cntBlock != nil {
+		return e.blockScope().cntBlock
 	}
 	if e.parent == nil {
 		return nil
@@ -214,12 +215,12 @@ func (e *Env) GetContinueBlock() *ir.Block {
 }
 
 func (e *Env) SetBreakBlock(b *ir.Block) {
-	e.funcScope().brkBlock = b
+	e.blockScope().brkBlock = b
 }
 
 func (e *Env) GetBreakBlock() *ir.Block {
-	if e.funcScope().brkBlock != nil {
-		return e.funcScope().brkBlock
+	if e.blockScope().brkBlock != nil {
+		return e.blockScope().brkBlock
 	}
 	if e.parent == nil {
 		return nil
