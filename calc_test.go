@@ -57,7 +57,7 @@ func TestCalc(t *testing.T) {
 		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 
 		//STRING
-		//{script: `s="ABC";print s`, ok: "ABC\n"},
+		{script: `s="ABC";print s`, ok: "ABC\n"},
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},

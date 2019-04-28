@@ -48,6 +48,13 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			return value.Value(tmp), nil
 		}
 
+	case *ast.StringExpr:
+		lit := expr.(*ast.StringExpr).Literal
+		str1 := constant.NewCharArrayFromString(lit + "\x00")
+		tmp := env.Block().NewAlloca(types.NewArray(uint64(len(lit)+1), types.I8))
+		env.Block().NewStore(str1, tmp)
+		return value.Value(tmp), nil
+
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
 		v, err := env.GetVar(id)
