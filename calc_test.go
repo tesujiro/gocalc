@@ -31,7 +31,7 @@ func TestCalc(t *testing.T) {
 		//OPTIONS
 		{script: "1", options: []string{"-a"}, ok_regex: `ast.NumExpr{Literal:"1"}`},
 		{script: "1", options: []string{"-i"}, ok_regex: `define i32 @main\(\) {`},
-		{script: "1", options: []string{"-d"}, ok_regex: `debug option`},
+		{script: "for i=0;i<1;i++{print i}", options: []string{"-d"}, ok_regex: `debug option`},
 		{script: "1", options: []string{"-n"}, ok: ""},
 
 		//BASIC EXPRESSION
@@ -55,6 +55,9 @@ func TestCalc(t *testing.T) {
 		{script: "print (1+30)*2", ok: "62\n"},
 		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
 		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
+
+		//STRING
+		//{script: `s="ABC";print s`, ok: "ABC\n"},
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},
