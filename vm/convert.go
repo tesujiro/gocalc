@@ -10,7 +10,6 @@ import (
 // precedenceOfTypes returns the greater of two kinds
 // Double > Int
 func precedenceOfTypes(type1, type2 types.Type) types.Type {
-	//if type1 == type2 { // Equal??
 	if type1.Equal(type2) {
 		return type1
 	}
