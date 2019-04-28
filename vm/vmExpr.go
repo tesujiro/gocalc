@@ -288,10 +288,7 @@ func evalAssExpr(lexp ast.Expr, val value.Value, env *Env) (value.Value, error) 
 		key := lexp.(*ast.IdentExpr).Literal
 		stored_value, err := env.GetVar(key)
 		if err == ErrUnknownSymbol || !val.Type().Equal(stored_value.Type()) {
-			// LLIR: %x = alloca i32
-			tmp := env.Block().NewAlloca(val.Type())
-			// LLIR: store i32 <u>, i32* %x
-			env.Block().NewStore(val, tmp)
+			// New Variable do nothing
 		} else if err != nil {
 			return nil, err
 		} else {

@@ -58,6 +58,8 @@ func TestCalc(t *testing.T) {
 
 		//STRING
 		{script: `s="ABC";print s`, ok: "ABC\n"},
+		{script: `s=1;s="ABC";print s`, ok: "ABC\n"},
+		{script: `s="ABC";s=123;print s`, ok: "123\n"},
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},
@@ -105,6 +107,7 @@ func TestCalc(t *testing.T) {
 
 		//ASSIGNMENT
 		{script: "i=1;print i", ok: "1\n"},
+		{script: "i=1;i=123;print i", ok: "123\n"},
 		{script: "i=1;i=2.3;print i", ok: "2.3\n"},
 		{script: "i=1;i=2.3;i=1;print i", ok: "1\n"},
 		{script: "i=1.2;print i", ok: "1.2\n"},
@@ -183,7 +186,7 @@ func TestCalc(t *testing.T) {
 		case_number++
 		wg := &sync.WaitGroup{}
 
-		//fmt.Printf("TEST[%v] %v\n", case_number, test.script)
+		fmt.Printf("TEST[%v] %v\n", case_number, test.script)
 
 		// OUT PIPE
 		readFromOut, writeToOut, err := os.Pipe()
