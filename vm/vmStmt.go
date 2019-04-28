@@ -3,7 +3,6 @@ package vm
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
@@ -206,8 +205,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		}
 
 		// String
-		//if types.NewPointer(types.NewArray(4, types.I8)).Equal(v.Type()) {
-		if strings.HasSuffix(v.Type().String(), "x i8]*") { //TODO: NOT STRICT
+		if isString(v) {
 			zero := constant.NewInt(types.I32, 0)
 			env.Block().NewCall(env.lib["printf"], constant.NewGetElementPtr(env.defs[".print_string"], zero, zero), v)
 			return v, nil
