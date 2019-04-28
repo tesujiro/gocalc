@@ -36,7 +36,7 @@
 %token	<token>		RETURN EXIT
 %token	<token>		PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 /*
-%token	<token>	STRING TRUE FALSE NIL
+%token	<token>	TRUE FALSE NIL
 %token	<token>	LEN 
 */
 
@@ -216,6 +216,10 @@ expr
 	| NUMBER
 	{
 		$$ = &ast.NumExpr{Literal: $1.Literal}
+	}
+	| STRING
+	{
+		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
 	/* BOOL EXPRESSION */
 	| expr OROR expr
