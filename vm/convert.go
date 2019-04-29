@@ -6,13 +6,20 @@ import (
 )
 
 // precedenceOfTypes returns the greater of two kinds
-// Double > Int
+// String > Double > Int
 func precedenceOfTypes(type1, type2 types.Type) types.Type {
 	if type1.Equal(type2) {
 		return type1
 	}
-	list := []types.Type{types.Double, types.I32, types.I1}
+	CharArray0 := &types.ArrayType{ElemType: types.I8, Len: 0}
+	list := []types.Type{CharArray0, types.Double, types.I32, types.I1}
 	index := func(t types.Type) int {
+		//if types.IsPointer(t) && types.IsArray(t.(*types.PointerType).ElemType) {
+		if types.IsArray(t) {
+			t_copy := *t.(*types.ArrayType)
+			t = &t_copy
+			t.(*types.ArrayType).Len = 0
+		}
 		for i, v := range list {
 			if t.Equal(v) {
 				return i
@@ -20,6 +27,8 @@ func precedenceOfTypes(type1, type2 types.Type) types.Type {
 		}
 		return -1
 	}
+	//fmt.Printf("index(%v)=%v\n", type1, index(type1))
+	//fmt.Printf("index(%v)=%v\n", type2, index(type2))
 	if index(type1) < index(type2) {
 		return type1
 	} else {
@@ -28,11 +37,11 @@ func precedenceOfTypes(type1, type2 types.Type) types.Type {
 }
 
 func isString(v value.Value) bool {
-	v_type := v.Type()
-	if !types.IsPointer(v_type) {
+	// String is a Pointer to Array of I8
+	if !types.IsPointer(v.Type()) {
 		return false
 	}
-	pointer_type := v_type.(*types.PointerType)
+	pointer_type := v.Type().(*types.PointerType)
 	if !types.IsArray(pointer_type.ElemType) {
 		return false
 	}

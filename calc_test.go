@@ -56,7 +56,7 @@ func TestCalc(t *testing.T) {
 		{rc: 1, ok: "No expression error!\nex: calc '(1+1)*3+10' ; echo $?\n"},
 		{script: "xxxx", rc: 1, ok: "Compile error: unknown symbol\n"},
 
-		//STRING
+		// String Assign
 		{script: `s="ABC";print s`, ok: "ABC\n"},
 		{script: `s='ABC';print s`, ok: "ABC\n"},
 		{script: `s="\n";print s`, ok: "\n\n"},
@@ -66,6 +66,18 @@ func TestCalc(t *testing.T) {
 		{script: `s="a\fb";print s`, ok: "a\fb\n"},
 		{script: `s=1;s="ABC";print s`, ok: "ABC\n"},
 		{script: `s="ABC";s=123;print s`, ok: "123\n"},
+		// String Compare
+		{script: `s="ABC";print s=="ABC"`, ok: "1\n"},
+		{script: `s="ABC";print s=="DEF"`, ok: "0\n"},
+		{script: `s="ABC";print s!="ABC"`, ok: "0\n"},
+		{script: `s="ABC";print s>"ABC"`, ok: "0\n"},
+		{script: `s="ABC";print s>="ABC"`, ok: "1\n"},
+		{script: `s="ABC";print s<="ABC"`, ok: "1\n"},
+		{script: `s="ABC";print s<"ABC"`, ok: "0\n"},
+		{script: `s="ABC";print s>"AB"`, ok: "1\n"},
+		{script: `s="ABC";print s>"ABCD"`, ok: "0\n"},
+		{script: `s="ABC";print s<"AB"`, ok: "0\n"},
+		{script: `s="ABC";print s<"ABCD"`, ok: "1\n"},
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},

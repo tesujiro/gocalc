@@ -148,8 +148,14 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		*/
 		l_type, r_type := l_register.Type(), r_register.Type()
 		arithmetic_type := precedenceOfTypes(l_type, r_type)
+		//fmt.Printf("arithmetic_type=%v\n", arithmetic_type)
 		compare := func(ipred enum.IPred, fpred enum.FPred) value.Value {
-			if arithmetic_type != types.Double {
+			if types.IsArray(arithmetic_type) {
+				left_i8ptr := env.Block().NewBitCast(left, types.I8Ptr)
+				right_i8ptr := env.Block().NewBitCast(right, types.I8Ptr)
+				result := env.Block().NewCall(env.lib["strcmp"], left_i8ptr, right_i8ptr)
+				return env.Block().NewICmp(ipred, result, constant.NewInt(types.I32, 0))
+			} else if arithmetic_type != types.Double {
 				return env.Block().NewICmp(ipred, l_register, r_register)
 			} else {
 				l := toDouble(env, l_register)

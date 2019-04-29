@@ -6,6 +6,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 	"github.com/tesujiro/gocalc/debug"
@@ -41,8 +42,14 @@ func NewEnv() *Env {
 	// LLIR: declare i32 @printf(i8* %format, ...)
 	i8ptr := types.NewPointer(types.I8)
 	printf := module.NewFunc("printf", types.I32, ir.NewParam("format", i8ptr))
+	printf.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind}
 	printf.Sig.Variadic = true
 	lib["printf"] = printf
+
+	// LLIR: declare i32 @strcmp(i8* nocapture, i8* nocapture) local_unnamed_addr
+	strcmp := module.NewFunc("strcmp", types.I32, ir.NewParam("str1", i8ptr), ir.NewParam("str2", i8ptr))
+	strcmp.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind, enum.FuncAttrReadOnly}
+	lib["strcmp"] = strcmp
 
 	// LLIR: @.str.result = global [12 x i8] c"Result : %d\0A"
 	defs[".print_int"] = module.NewGlobalDef(".print_int", constant.NewCharArrayFromString("%d\n\x00"))
