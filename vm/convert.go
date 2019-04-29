@@ -16,7 +16,7 @@ func precedenceOfTypes(type1, type2 types.Type) types.Type {
 	list := []types.Type{types.Double, types.I32, types.I1}
 	index := func(t types.Type) int {
 		for i, v := range list {
-			if t == v {
+			if t.Equal(v) {
 				return i
 			}
 		}
