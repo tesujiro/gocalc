@@ -215,6 +215,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (value.Value, error) {
 		r := env.Block().NewLoad(v)
 
 		switch r.Type() {
+		case types.I64:
+			//env.Block().NewZExt(r, types.I32)
+			fallthrough
 		case types.I1, types.I32:
 			// LLIR: %8 = call i32 (i8*, ...) @printf(i8* getelementptr ([12 x i8], [12 x i8]* @.str.result, i32 0, i32 0), i32 %7)
 			zero := constant.NewInt(types.I32, 0)

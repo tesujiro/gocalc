@@ -51,6 +51,7 @@ var opName = map[string]int{
 	"continue": CONTINUE,
 	"return":   RETURN,
 	"exit":     EXIT,
+	"len":      LEN,
 	/*
 		"BEGIN":    BEGIN,
 		"END":      END,

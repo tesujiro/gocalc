@@ -35,9 +35,9 @@
 %token	<token>		FOR BREAK CONTINUE
 %token	<token>		RETURN EXIT
 %token	<token>		PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
+%token	<token>		LEN 
 /*
-%token	<token>	TRUE FALSE NIL
-%token	<token>	LEN 
+%token	<token>		TRUE FALSE NIL
 */
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
@@ -176,6 +176,18 @@ expr
 		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
 	*/
+	| NUMBER
+	{
+		$$ = &ast.NumExpr{Literal: $1.Literal}
+	}
+	| STRING
+	{
+		$$ = &ast.StringExpr{Literal: $1.Literal}
+	}
+	| LEN '(' expr ')'
+	{
+		$$ = &ast.LenExpr{Expr: $3}
+	}
 	/* COMPOSITE EXPRESSION */
 	| variable PLUSEQ expr
 	{
@@ -212,14 +224,6 @@ expr
 	| MINUSMINUS variable
 	{
 		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
-	}
-	| NUMBER
-	{
-		$$ = &ast.NumExpr{Literal: $1.Literal}
-	}
-	| STRING
-	{
-		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
 	/* BOOL EXPRESSION */
 	| expr OROR expr

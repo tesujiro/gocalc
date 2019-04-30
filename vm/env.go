@@ -51,6 +51,21 @@ func NewEnv() *Env {
 	strcmp.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind, enum.FuncAttrReadOnly}
 	lib["strcmp"] = strcmp
 
+	// LLIR: declare i64 @strlen(i8* nocapture) local_unnamed_addr #2
+	strlen := module.NewFunc("strlen", types.I64, ir.NewParam("str", i8ptr))
+	strlen.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind, enum.FuncAttrReadOnly, enum.FuncAttrArgMemOnly}
+	lib["strlen"] = strlen
+
+	// LLIR:
+	strcpy := module.NewFunc("strcpy", types.I32, ir.NewParam("str1", i8ptr), ir.NewParam("str2", i8ptr))
+	strcpy.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind, enum.FuncAttrReadOnly}
+	lib["strcpy"] = strcpy
+
+	// LLIR:
+	strcat := module.NewFunc("strcat", types.I32, ir.NewParam("str1", i8ptr), ir.NewParam("str2", i8ptr))
+	strcat.FuncAttrs = []ir.FuncAttribute{enum.FuncAttrNoUnwind, enum.FuncAttrReadOnly}
+	lib["strcat"] = strcat
+
 	// LLIR: @.str.result = global [12 x i8] c"Result : %d\0A"
 	defs[".print_int"] = module.NewGlobalDef(".print_int", constant.NewCharArrayFromString("%d\n\x00"))
 	defs[".print_float"] = module.NewGlobalDef(".print_float", constant.NewCharArrayFromString("%g\n\x00"))

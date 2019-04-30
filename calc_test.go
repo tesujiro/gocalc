@@ -66,6 +66,10 @@ func TestCalc(t *testing.T) {
 		{script: `s="a\fb";print s`, ok: "a\fb\n"},
 		{script: `s=1;s="ABC";print s`, ok: "ABC\n"},
 		{script: `s="ABC";s=123;print s`, ok: "123\n"},
+		// Length
+		{script: `s="ABC";print len(s)`, ok: "3\n"},
+		{script: `s=123;print len(s)`, ok: "Compile error: arg type error: i32*\n"},
+		{script: `print len(s)`, ok: "Compile error: unknown symbol\n"},
 		// String Compare
 		{script: `s="ABC";print s=="ABC"`, ok: "1\n"},
 		{script: `s="ABC";print s=="DEF"`, ok: "0\n"},
@@ -78,6 +82,14 @@ func TestCalc(t *testing.T) {
 		{script: `s="ABC";print s>"ABCD"`, ok: "0\n"},
 		{script: `s="ABC";print s<"AB"`, ok: "0\n"},
 		{script: `s="ABC";print s<"ABCD"`, ok: "1\n"},
+		{script: `s="ABC";print s==1`, ok: "0\n"},
+		{script: `s=1;print s=="ABC"`, ok: "0\n"},
+		// String operation
+		{script: `s="A"+"BC";print s`, ok: "ABC\n"},
+		{script: `s="A";s+="BC";print s`, ok: "ABC\n"},
+		{script: `s="A";s+="A";print s`, ok: "AA\n"},
+		//{script: `s="A";for i=0;i<3;i++{s=s+"A"};print s`, ok: "AAAA\n"},
+		//{script: `s="A";for i=0;i<3;i++{s+="A"};print s`, ok: "AAAA\n"},
 
 		// Float
 		{script: "print 1.23", ok: "1.23\n"},
@@ -193,6 +205,7 @@ func TestCalc(t *testing.T) {
 		{script: "for i=1;j<5;i++{print i}", ok: "Compile error: for condition expr error: unknown symbol\n"},
 		{script: "for i=1;i<5;j++{print i}", ok: "Compile error: for final expr error: unknown symbol\n"},
 		{script: "for i=1;i<5;i++{print j}", ok: "Compile error: for loop stmts error: unknown symbol\n"},
+		{script: `count=1;for i=0;i<3;i++{count+=1};print count`, ok: "4\n"},
 	}
 
 	//realStdin := os.Stdin

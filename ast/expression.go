@@ -43,3 +43,7 @@ type CompExpr struct {
 	Right    Expr
 	//After    bool
 }
+
+type LenExpr struct {
+	Expr Expr
+}

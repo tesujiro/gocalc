@@ -55,6 +55,25 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		env.Block().NewStore(str1, tmp)
 		return value.Value(tmp), nil
 
+	case *ast.LenExpr:
+		val, err := evalExpr(expr.(*ast.LenExpr).Expr, env)
+		if err != nil {
+			return nil, err
+		}
+		if !isString(val) {
+			return nil, fmt.Errorf("arg type error: %v", val.Type())
+		}
+		// LLIR: %1 = bitcast [4 x i8]* %0 to i8*
+		val_i8ptr := env.Block().NewBitCast(val, types.I8Ptr)
+		// LLIR: %2 = call i64 @strlen(i8* %1)
+		result := env.Block().NewCall(env.lib["strlen"], val_i8ptr)
+		// LLIR: %x = alloca i32
+		tmp := env.Block().NewAlloca(result.Type())
+		// LLIR: store i32 <u>, i32* %x
+		env.Block().NewStore(result, tmp)
+
+		return value.Value(tmp), nil
+
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
 		v, err := env.GetVar(id)
@@ -137,9 +156,9 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 			return nil, err
 		}
 		// LLIR: %x = load i32, i32* %y
-		l_register := env.Block().NewLoad(left)
+		l_register := env.Block().NewLoad(left) //TODO: string concat does not use l_register,r_register
 		// LLIR: %x = load i32, i32* %y
-		r_register := env.Block().NewLoad(right)
+		r_register := env.Block().NewLoad(right) //TODO: string concat does not use l_register,r_register
 
 		/*
 			if l_register.Type() == types.Double || r_register.Type() == types.Double {
@@ -167,10 +186,35 @@ func evalExpr(expr ast.Expr, env *Env) (value.Value, error) {
 		var result value.Value
 		switch expr.(*ast.BinOpExpr).Operator {
 		case "+":
-			if arithmetic_type != types.Double {
+			//if types.IsArray(arithmetic_type) { // TODO: isStringType
+			if isStringType(arithmetic_type) {
+				l_i8ptr := env.Block().NewBitCast(left, types.I8Ptr)
+				r_i8ptr := env.Block().NewBitCast(right, types.I8Ptr)
+				// length of new string = len(left) + len(right) +1
+				l_len := env.Block().NewCall(env.lib["strlen"], l_i8ptr)
+				r_len := env.Block().NewCall(env.lib["strlen"], r_i8ptr)
+
+				//total_len := env.Block().NewAdd(l_len_ptr, r_len_ptr)
+				total_len := env.Block().NewAdd(l_len, r_len)
+				total_len = env.Block().NewAdd(total_len, constant.NewInt(types.I64, int64(1)))
+				// allocate new string
+				new_str := env.Block().NewAlloca(types.I8)
+				new_str.NElems = total_len
+				// concatenate
+				env.Block().NewCall(env.lib["strcpy"], new_str, l_i8ptr)
+				env.Block().NewCall(env.lib["strcat"], new_str, r_i8ptr)
+				//result = env.Block().NewBitCast(new_str, &types.ArrayType{ElemType: types.I8, Len: 4})
+				result = new_str
+				//zero := constant.NewInt(types.I32, 0)
+				//result = env.Block().NewGetElementPtr(new_str, zero, zero)
+
+				return value.Value(result), nil
+			} else if arithmetic_type != types.Double {
+				//fmt.Println("ELSE IF!!")
 				// LLIR: %r= add i32 %l, %r
 				result = env.Block().NewAdd(l_register, r_register)
 			} else {
+				//fmt.Println("ELSE!!")
 				l := toDouble(env, l_register)
 				r := toDouble(env, r_register)
 				// LLIR: %r= add i32 %l, %r
@@ -293,11 +337,23 @@ func evalAssExpr(lexp ast.Expr, val value.Value, env *Env) (value.Value, error) 
 	case *ast.IdentExpr:
 		key := lexp.(*ast.IdentExpr).Literal
 		stored_value, err := env.GetVar(key)
+		if stored_value != nil {
+			//fmt.Printf("stored_value=%v\n", stored_value.Type())
+			//fmt.Printf("val=%v\n", val.Type())
+		}
+
 		if err == ErrUnknownSymbol || !val.Type().Equal(stored_value.Type()) {
+			if types.IsArray(val.Type()) && val.Type().(*types.ArrayType).ElemType.Equal(types.I8) {
+
+			}
+			//if err == ErrUnknownSymbol {
+			//fmt.Printf("path1 key=%v\n", key)
 			// New Variable do nothing
 		} else if err != nil {
+			//fmt.Println("path2")
 			return nil, err
 		} else {
+			//fmt.Println("path3")
 			// LLIR: %x = load i32, i32* %y
 			v_value := env.Block().NewLoad(val)
 			// LLIR: store i32 <u>, i32* %x

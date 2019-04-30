@@ -37,19 +37,28 @@ func precedenceOfTypes(type1, type2 types.Type) types.Type {
 }
 
 func isString(v value.Value) bool {
-	// String is a Pointer to Array of I8
-	if !types.IsPointer(v.Type()) {
+	//fmt.Printf("isString(%v)=%v\n", v.Type(), isStringType(v.Type()))
+	v_type := v.Type()
+	return isStringType(v_type)
+}
+
+func isStringType(t types.Type) bool {
+	// String is a Pointer to i8
+	if t.Equal(types.I8Ptr) {
+		return true
+	}
+	if types.IsPointer(t) {
+		// String is a Pointer to Array of I8
+		t = t.(*types.PointerType).ElemType
+	}
+	// String is a Array of i8
+	if !types.IsArray(t) {
 		return false
 	}
-	pointer_type := v.Type().(*types.PointerType)
-	if !types.IsArray(pointer_type.ElemType) {
-		return false
-	}
-	array_type := *pointer_type.ElemType.(*types.ArrayType) // Copy ArrayType
+	array_type := *t.(*types.ArrayType) // Copy ArrayType
 	array_type.Len = 0
 	CharArray0 := &types.ArrayType{ElemType: types.I8, Len: 0}
 	return array_type.Equal(CharArray0)
-	//return strings.HasSuffix(v.Type().String(), "x i8]*")
 }
 
 func toDouble(env *Env, v value.Value) value.Value {
